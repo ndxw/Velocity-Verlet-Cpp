@@ -1,12 +1,14 @@
 #include "../include/Solver.h"
+#include <iostream>
 #include <cmath>
 
 Solver::Solver()
 {
     time = 0.f;
-    objects.clear(); objects.reserve(MAX_OBJECTS);
+    objects.clear();
     GRAVITY = Vec2D(0.f, 3000.f);
     BOUNDS = RectBounds();
+    grid = Grid(Circle::getMaxRadius(), BOUNDS.right, BOUNDS.down);
     FRAMERATE = 60;
     SUBSTEPS = 1;
     DT = 1 / float(FRAMERATE);
@@ -106,66 +108,84 @@ void Solver::applyGravity()
 
 void Solver::applyCollisions()
 {
-    for (int i = 0; i < objects.size(); i++)
-    {
-        for (int j = i+1; j < objects.size(); j++)
-        {
-            auto& obj1 = objects[i];
-            auto& obj2 = objects[j];
-            Vec2D posDiff12;
-            Vec2D::subtract(posDiff12, obj1.pos, obj2.pos);
+    grid.partitionObjects(objects);
 
-            if (posDiff12.length() < obj1.radius + obj2.radius)
-            {
-                /*
-                Calculate new velocities using equations for two-dimensional 
-                collision with two moving objects
+    for (int cellIdx = 0; cellIdx < grid.cells.size(); cellIdx++) {
+        //std::cout << std::to_string(cellIdx) << std::endl;
 
-                Equations in vector representation can be
-                found @ https://en.wikipedia.org/wiki/Elastic_collision
-                */
-                Vec2D velDiff12, posDiffScaled12;
-                Vec2D::subtract(velDiff12, obj1.vel, obj2.vel);
-                float scalar1 = (2.0f * obj2.mass / (obj1.mass + obj2.mass)) 
-                    * Vec2D::dot(velDiff12, posDiff12) 
-                    / (posDiff12.length() * posDiff12.length());
-                Vec2D::scale(posDiffScaled12, posDiff12, scalar1);
+        if (isLeftCol(cellIdx) || isRightCol(cellIdx) || 
+            isTopRow(cellIdx) || isBottomRow(cellIdx)) continue;
 
-                Vec2D posDiff21, velDiff21, posDiffScaled21;
-                Vec2D::subtract(posDiff21, obj2.pos, obj1.pos);
-                Vec2D::subtract(velDiff21, obj2.vel, obj1.vel);
-                float scalar2 = (2.0f * obj1.mass / (obj1.mass + obj2.mass)) 
-                    * Vec2D::dot(velDiff21, posDiff21) 
-                    / (posDiff21.length() * posDiff21.length());
-                Vec2D::scale(posDiffScaled21, posDiff21, scalar2);
+        // create list of obj in current and adjacent cells
+        std::vector<Circle*> kernelObjs;
+        int kernelCells[9] = { cellIdx - grid.HEIGHT - 1, cellIdx - grid.HEIGHT, cellIdx - grid.HEIGHT + 1,
+                               cellIdx - 1,               cellIdx,               cellIdx + 1,
+                               cellIdx + grid.HEIGHT - 1, cellIdx + grid.HEIGHT, cellIdx + grid.HEIGHT + 1 };
+        for (int kCellIdx : kernelCells) {
+            for (Circle* obj : grid.cells.at(kCellIdx)) {
+                kernelObjs.push_back(obj);
+            }
+        }
 
-                /*
-                Update velocities after computing both to avoid using new v1
-                in calculation for new v2
-                */
-                Vec2D::subtract(obj1.vel, obj1.vel, posDiffScaled12);
-                Vec2D::subtract(obj2.vel, obj2.vel, posDiffScaled21);
+        for (int i = 0; i < kernelObjs.size(); i++) {
+            for (int j = i + 1; j < kernelObjs.size(); j++) {
+                Circle* obj1 = kernelObjs.at(i);
+                Circle* obj2 = kernelObjs.at(j);
+                Vec2D posDiff12;
+                Vec2D::subtract(posDiff12, obj1->pos, obj2->pos);
 
-                /*
-                Update positions by shifting each object by half the overlap
-                in opposite directions along the collision axis
-                */
-                float overlap = obj1.radius + obj2.radius - posDiff12.length();
+                if (posDiff12.length() < obj1->radius + obj2->radius) {
+                    /*
+                    Calculate new velocities using equations for two-dimensional
+                    collision with two moving objects
 
-                Vec2D updatePos1, updatePos2;
-                Vec2D::scale(updatePos1, posDiff12, 0.5f * overlap / posDiff12.length());
-                obj1.pos.add(updatePos1);
-                
-                Vec2D::scale(updatePos2, posDiff21, 0.5f * overlap / posDiff21.length());
-                obj2.pos.add(updatePos2);
+                    Equations in vector representation can be
+                    found @ https://en.wikipedia.org/wiki/Elastic_collision
+                    */
+                    Vec2D velDiff12, posDiffScaled12;
+                    Vec2D::subtract(velDiff12, obj1->vel, obj2->vel);
+                    float scalar1 = (2.0f * obj2->mass / (obj1->mass + obj2->mass))
+                        * Vec2D::dot(velDiff12, posDiff12)
+                        / (posDiff12.length() * posDiff12.length());
+                    Vec2D::scale(posDiffScaled12, posDiff12, scalar1);
 
-                /*
-                Set collision status for velocity scaling later
-                */
-                obj1.collided = true; obj2.collided = true;
+                    Vec2D posDiff21, velDiff21, posDiffScaled21;
+                    Vec2D::subtract(posDiff21, obj2->pos, obj1->pos);
+                    Vec2D::subtract(velDiff21, obj2->vel, obj1->vel);
+                    float scalar2 = (2.0f * obj1->mass / (obj1->mass + obj2->mass))
+                        * Vec2D::dot(velDiff21, posDiff21)
+                        / (posDiff21.length() * posDiff21.length());
+                    Vec2D::scale(posDiffScaled21, posDiff21, scalar2);
+
+                    /*
+                    Update velocities after computing both to avoid using new v1
+                    in calculation for new v2
+                    */
+                    Vec2D::subtract(obj1->vel, obj1->vel, posDiffScaled12);
+                    Vec2D::subtract(obj2->vel, obj2->vel, posDiffScaled21);
+
+                    /*
+                    Update positions by shifting each object by half the overlap
+                    in opposite directions along the collision axis
+                    */
+                    float overlap = obj1->radius + obj2->radius - posDiff12.length();
+
+                    Vec2D updatePos1, updatePos2;
+                    Vec2D::scale(updatePos1, posDiff12, 0.5f * overlap / posDiff12.length());
+                    obj1->pos.add(updatePos1);
+
+                    Vec2D::scale(updatePos2, posDiff21, 0.5f * overlap / posDiff21.length());
+                    obj2->pos.add(updatePos2);
+
+                    /*
+                    Set collision status for velocity scaling later
+                    */
+                    obj1->collided = true; obj2->collided = true;
+                }
             }
         }
     }
+    grid.resetCells();
 }
 
 void Solver::applyBounds()
@@ -236,12 +256,17 @@ void Solver::updateSolver()
     for (int substep = 0; substep < SUBSTEPS; substep++)
     {
         applyGravity();
+        applyBounds();
         applyCollisions();
         applyRestitution();
-        applyBounds();
         updateObjects();
     }
     time += DT;
 }
+
+bool Solver::isTopRow(int cellIdx) { return (cellIdx % grid.HEIGHT) == (grid.HEIGHT - 1); }
+bool Solver::isBottomRow(int cellIdx) { return (cellIdx % grid.HEIGHT) == 0; }
+bool Solver::isLeftCol(int cellIdx) { return cellIdx < grid.HEIGHT; }
+bool Solver::isRightCol(int cellIdx) { return cellIdx >= (grid.cells.size() - grid.HEIGHT); }
 
 

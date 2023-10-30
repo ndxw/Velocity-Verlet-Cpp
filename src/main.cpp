@@ -85,3 +85,61 @@ int main()
 
     return 0;
 }
+
+//int main() {
+//
+//	const int WINDOW_W = 700;
+//	const int WINDOW_H = 700;
+//	
+//	// configure solver parameters
+//	Solver solver = Solver();
+//	solver.setBounds(RectBounds(0, WINDOW_W, 0, WINDOW_H));
+//	solver.setFramerate(60);
+//	solver.setSubsteps(4);
+//	solver.setMaxObjects(1000);
+//	solver.setSpawnInterval(0.2f);
+//
+//	Circle c1 = Circle(Vec2D(700, 10), Vec2D(0, 0), Vec2D(0, 0), 10.f, 1.f, sf::Color::White, 1);
+//	Circle c2 = Circle(Vec2D(1, 1), Vec2D(0, 0), Vec2D(0, 0), 20.f, 1.f, sf::Color::White, 2);
+//	Circle c3 = Circle(Vec2D(20, 20), Vec2D(0, 0), Vec2D(0, 0), 30.f, 1.f, sf::Color::White, 3);
+//
+//	solver.addObject(c1);
+//	solver.addObject(c2);
+//	solver.addObject(c3);
+//	//solver.applyBounds();
+//
+//	solver.grid.partitionObjects(solver.objects);
+//
+//	// print solver and grid objects
+//	// (should both contain identical objects)
+//	for (auto& obj : solver.objects) {
+//		std::cout << obj.toString() << std::endl;
+//	}
+//	for (auto& cell : solver.grid.cells) {
+//		for (Circle* obj : cell) {
+//			std::cout << obj->toString() << std::endl;
+//		}
+//	}
+//	
+//	// modify grid objects
+//	std::cout << "Modifying objects...\n" << std::endl;
+//	for (auto& cell : solver.grid.cells) {
+//		for (Circle* obj : cell) {
+//			obj->vel.setX(10);
+//		}
+//	}
+//
+//	// check if both solver and grid objects have been changed
+//	for (auto& obj : solver.objects) {
+//		std::cout << obj.toString() << std::endl;
+//	}
+//	for (auto& cell : solver.grid.cells) {
+//		for (Circle* obj : cell) {
+//			std::cout << obj->toString() << std::endl;
+//		}
+//	}
+//
+//	std::cout << solver.grid.toString() << std::endl;
+//
+//	return 0;
+//}

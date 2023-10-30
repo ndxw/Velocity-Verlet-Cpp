@@ -19,15 +19,19 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Grid.h" />
     <ClInclude Include="include\Objects.h" />
     <ClInclude Include="include\Renderer.h" />
     <ClInclude Include="include\Solver.h" />
+    <ClInclude Include="include\Vec2D.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Grid.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Objects.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\Solver.cpp" />
+    <ClCompile Include="src\Vec2D.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="resources\arial.ttf" />

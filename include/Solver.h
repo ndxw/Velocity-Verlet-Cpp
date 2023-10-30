@@ -1,13 +1,15 @@
 #ifndef SOLVER_H
 #define SOLVER_H
 
-#include "./Objects.h"
+#include "Objects.h"
+#include "Grid.h"
 
 class Solver
 {
     private:
         float time;                     // seconds
-        std::vector<Circle> objects;
+        
+        
         Vec2D GRAVITY;
         RectBounds BOUNDS;
         int FRAMERATE;                  // fps
@@ -18,12 +20,20 @@ class Solver
         float SPAWN_INTERVAL;           // seconds
 
         void applyGravity();
-        void applyCollisions();
         void applyBounds();
-        void updateObjects();
+        void applyCollisions();
         void applyRestitution();
+        void updateObjects();
+
+        bool isTopRow(int);
+        bool isBottomRow(int);
+        bool isLeftCol(int);
+        bool isRightCol(int);
         
     public:
+        std::vector<Circle> objects;
+        Grid grid;  // private it once done testing
+
         Solver();
         ~Solver();
 

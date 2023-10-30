@@ -1,47 +1,8 @@
 #ifndef OBJECTS_H
 #define OBJECTS_H
 
-#include <string>
-#include <vector>
+#include "Vec2D.h"
 #include <SFML/Graphics/Color.hpp>
-
-class Vec2D
-{
-    private:
-        float xComp;
-        float yComp;
-        float len;
-
-        void computeLength();
-
-    public:
-        Vec2D();
-        Vec2D(float, float);
-        ~Vec2D();
-
-        float x() const;
-        float y() const;
-        void setX(float);
-        void setY(float);
-        float length();
-
-        // overloaded ops non-functional, do not use
-        Vec2D operator+(Vec2D const&);
-        Vec2D operator-(Vec2D const&);
-        Vec2D operator*(float);
-        //------------------------------------------
-
-        void add(Vec2D const&);
-        void subtract(Vec2D const&);
-        void scale(const float);
-        static void add(Vec2D &, Vec2D const&, Vec2D const&);
-        static void subtract(Vec2D&, Vec2D const&, Vec2D const&);
-        static void scale(Vec2D&, Vec2D const&, const float);
-        static float dot(Vec2D const&, Vec2D const&);
-        void mirrorAboutX();
-        void mirrorAboutY();
-        std::string toString();
-};
 
 class Object
 {  
@@ -60,6 +21,7 @@ class Object
             const float, const float, const sf::Color&);
 
         void update(float);
+        std::string toString();
 };
 
 class Circle: public Object
@@ -82,6 +44,8 @@ public:
 
     static void generateRandomObject(Circle &);
     static void generateObject(Circle &, const Vec2D&, const Vec2D&, const Vec2D&, const float, const float, const sf::Color&, const float);
+
+    std::string toString();
 };
 
 class RectBounds
