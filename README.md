@@ -1,1 +1,2 @@
-A simple physics simulation, based on Velocity-Verlet integration
+A simple 2D physics simulation, based on Velocity-Verlet integration.
+Rewritten in C++ for performance.
