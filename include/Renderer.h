@@ -6,9 +6,6 @@
 
 class Renderer
 {
-    private:
-        static int RESOLUTION;
-
     public:
         static void render(const Solver &, sf::RenderWindow &);
 };

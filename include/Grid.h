@@ -6,14 +6,11 @@
 
 class Grid
 {
-private:
-	
-
 public:
+	std::vector<std::vector<Circle*>> cells;
 	int CELL_SIZE;
 	int WIDTH;
 	int HEIGHT;
-	std::vector<std::vector<Circle*>> cells; // move back to private
 
 	Grid();
 	Grid(int, int, int);

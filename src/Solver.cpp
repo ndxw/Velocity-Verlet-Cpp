@@ -87,16 +87,16 @@ void Solver::applyCollisions()
     int finalThreadCellCount = grid.WIDTH - (threadCount * cellsPerThread);
 
     // create threads 
-    std::vector<std::thread> threadPool;
+    std::vector<std::thread*> threadPool;
     for (int thread = 0; thread < threadCount; thread++) {
-        std::thread th_collision = std::thread(collisionDetectionThread, thread * cellsPerThread, (thread + 1) * cellsPerThread);
-        // if final thread use startCellIdx = thread * cellsPerThread and endCellIdx = thread * cellsPerThread + finalThreadCellCount
-
+        int startCellIdx = thread * cellsPerThread;
+        int endCellIdx = (thread == threadCount - 1) ? (int)grid.cells.size() : startCellIdx + cellsPerThread;
+        std::thread* th_collision = new std::thread(&Solver::collisionDetectionThread, this, startCellIdx, endCellIdx);
         threadPool.push_back(th_collision);
     }
 
     // wait for all threads to finish
-    for (auto& th_collision : threadPool) { th_collision.join(); }
+    for (auto th_collision : threadPool) { th_collision->join(); delete th_collision; }
 
     grid.resetCells();
 }
@@ -116,6 +116,7 @@ void Solver::collisionDetectionThread(int startCellIdx, int endCellIdx) {
             for (Circle* obj : grid.cells.at(kCellIdx)) { kernelObjs.push_back(obj); }
         }
 
+        // begin collision checks within kernel
         for (int i = 0; i < kernelObjs.size(); i++) {
             for (int j = i + 1; j < kernelObjs.size(); j++) {
                 Circle* obj1 = kernelObjs.at(i);

@@ -9,7 +9,8 @@ class Solver
     private:
         float time;                     // seconds
         
-        
+        std::vector<Circle> objects;
+        Grid grid;
         Vec2D GRAVITY;
         RectBounds BOUNDS;
         int FRAMERATE;                  // fps
@@ -33,9 +34,6 @@ class Solver
         bool isRightCol(int);
         
     public:
-        std::vector<Circle> objects;
-        Grid grid;  // private it once done testing
-
         Solver();
         ~Solver();
 

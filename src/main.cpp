@@ -3,8 +3,8 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/System/Clock.hpp>
 
-int Circle::MAX_RADIUS = 20;
-int Circle::MIN_RADIUS = 5;
+int Circle::MAX_RADIUS = 10;
+int Circle::MIN_RADIUS = 10;
 
 int main()
 {
@@ -24,6 +24,7 @@ int main()
 
     // configure solver parameters
     Solver solver = Solver();
+    solver.setGravity(Vec2D(0.f, 1000.f));
     solver.setBounds(RectBounds(0, WINDOW_W, 0, WINDOW_H));
     solver.setFramerate(60);
     solver.setSubsteps(4);

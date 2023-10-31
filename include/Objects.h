@@ -14,7 +14,6 @@ class Object
         float restitutionCoeff;
         sf::Color colour;
         bool collided = false;
-        
 
         Object();
         Object(const Vec2D&, const Vec2D&, const Vec2D&,

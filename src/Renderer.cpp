@@ -3,8 +3,6 @@
 #include <SFML/System/Vector2.hpp>
 
 
-#define PI acos(-1)
-
 void Renderer::render(const Solver &solver, sf::RenderWindow &window)
 {
     // render bounding box=====================================================
@@ -20,6 +18,7 @@ void Renderer::render(const Solver &solver, sf::RenderWindow &window)
 
     for (auto &obj : objects)
     {
+        // circle point count is currently 30 but i intend to reduce it to 20 when testing is complete
         sf::CircleShape ball = sf::CircleShape(float(obj.radius));
         ball.setOrigin(float(obj.radius), float(obj.radius));
         ball.setFillColor(obj.colour);
