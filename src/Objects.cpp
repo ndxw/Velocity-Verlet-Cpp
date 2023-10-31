@@ -140,7 +140,4 @@ RectBounds::RectBounds(int left, int right, int up, int down)
     this->down = down;
 }
 
-RectBounds::~RectBounds()
-{
-
-}
+RectBounds::~RectBounds() {}

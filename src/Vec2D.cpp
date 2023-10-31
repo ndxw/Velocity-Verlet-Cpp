@@ -14,10 +14,7 @@ Vec2D::Vec2D(float x, float y)
     computeLength();
 }
 
-Vec2D::~Vec2D()
-{
-
-}
+Vec2D::~Vec2D() {}
 
 float Vec2D::x() const { return xComp; }
 float Vec2D::y() const { return yComp; }
@@ -108,17 +105,9 @@ float Vec2D::dot(Vec2D const& vec1, Vec2D const& vec2)
     return vec1.xComp * vec2.xComp + vec1.yComp * vec2.yComp;
 }
 
-// mirrors this vector about the x-axis
-void Vec2D::mirrorAboutX()
-{
-    yComp = -yComp;
-}
-
-// mirrors this vector about the y-axis
-void Vec2D::mirrorAboutY()
-{
-    xComp = -xComp;
-}
+// mirrors vector about an axis
+void Vec2D::mirrorAboutX() { yComp = -yComp; }
+void Vec2D::mirrorAboutY() { xComp = -xComp; }
 
 // outputs this vector in the form (x, y)
 std::string Vec2D::toString()

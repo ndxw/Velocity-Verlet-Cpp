@@ -25,6 +25,8 @@ class Solver
         void applyRestitution();
         void updateObjects();
 
+        void collisionDetectionThread(int, int);
+
         bool isTopRow(int);
         bool isBottomRow(int);
         bool isLeftCol(int);
