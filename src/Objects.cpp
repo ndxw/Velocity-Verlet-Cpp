@@ -181,6 +181,44 @@ RectBounds::RectBounds(int left, int right, int up, int down)
     this->down = down;
 }
 
+/// <summary>
+/// Handles object collisions with the bounds.
+/// </summary>
+/// <param name="objects">Vector of <c>Circle</c> to apply the bounds to.</param>
+void RectBounds::applyBounds(std::vector<Circle>& objects) const {
+    for (auto& object : objects)
+    {
+        // collision with right wall
+        if (object.pos.x() + object.radius > right)
+        {
+            object.pos.setX(float(right - object.radius));
+            object.vel.mirrorAboutY();
+            object.vel.scale(object.restitutionCoeff);
+        }
+        // collision with left wall
+        else if (object.pos.x() - object.radius < left)
+        {
+            object.pos.setX(float(left + object.radius));
+            object.vel.mirrorAboutY();
+            object.vel.scale(object.restitutionCoeff);
+        }
+        // collision with ceiling
+        if (object.pos.y() - object.radius < up)
+        {
+            object.pos.setY(float(up + object.radius));
+            object.vel.mirrorAboutX();
+            object.vel.scale(object.restitutionCoeff);
+        }
+        // collision with floor
+        else if (object.pos.y() + object.radius > down)
+        {
+            object.pos.setY(float(down - object.radius));
+            object.vel.mirrorAboutX();
+            object.vel.scale(object.restitutionCoeff);
+        }
+    }
+}
+
 std::string RectBounds::toString() const {
     return "Bounds:\n\tleft: " + std::to_string(left) + "\t\tright: " + std::to_string(right) + "\t\tup: " + std::to_string(up) + "\t\tdown: " + std::to_string(down);
 }

@@ -3,6 +3,7 @@
 
 #include "Vec2D.h"
 #include <SFML/Graphics/Color.hpp>
+#include <vector>
 
 class Circle
 {
@@ -46,6 +47,8 @@ public:
 
     RectBounds();
     RectBounds(int, int, int, int);
+
+    void applyBounds(std::vector<Circle>&) const;
 
     std::string toString() const;
 };

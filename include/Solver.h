@@ -21,7 +21,6 @@ private:
     float SPAWN_INTERVAL;           // seconds
 
     void applyGravity();
-    void applyBounds();
     void applyCollisions();
     void applyRestitution();
     void updateObjects();

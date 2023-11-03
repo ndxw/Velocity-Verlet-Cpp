@@ -15,12 +15,11 @@ public:
 	Grid();
 	Grid(int, int, int);
 
-	void setGridWidth(const int);
-	void setGridHeight(const int);
+	void setGridSize(const int, const int);
 
 	void resetCells();
 	int positionToCellIdx(const Vec2D&);
-	void partitionObjects(std::vector<Circle>&, const RectBounds&);
+	void partitionObjects(std::vector<Circle>&);
 
 	bool isTopRow(int);
 	bool isBottomRow(int);

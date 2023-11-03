@@ -31,7 +31,7 @@ int main()
     solver.setBounds(RectBounds(0, WINDOW_W, 0, WINDOW_H));
     solver.setFramerate(60);
     solver.setSubsteps(4);
-    solver.setMaxObjects(1000);
+    solver.setMaxObjects(300);
     solver.setSpawnInterval(0.2f);
 
     // configure window
@@ -54,8 +54,7 @@ int main()
                 window.setView(sf::View(visibleArea));
                 solver.getBounds()->right = int(event.size.width);
                 solver.getBounds()->down = int(event.size.height);
-                solver.getGrid()->setGridWidth(int(event.size.width));
-                solver.getGrid()->setGridHeight(int(event.size.width));
+                solver.getGrid()->setGridSize(int(event.size.width), int(event.size.height));
             }
         }
 

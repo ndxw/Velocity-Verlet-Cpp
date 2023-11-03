@@ -117,7 +117,7 @@ void Solver::applyGravity()
 /// </summary>
 void Solver::applyCollisions()
 {
-    grid.partitionObjects(objects, BOUNDS);
+    grid.partitionObjects(objects);
 
     // should be solver attributes
     int threadCount = 4;
@@ -220,44 +220,6 @@ void Solver::collisionDetectionThread(int startCellIdx, int endCellIdx) {
 }
 
 /// <summary>
-/// Keeps objects within the <c>BOUNDS</c>.
-/// </summary>
-void Solver::applyBounds()
-{
-    for (auto &object : objects)
-    {
-        // collision with right wall
-        if (object.pos.x() + object.radius > BOUNDS.right)
-        {
-            object.pos.setX(float(BOUNDS.right - object.radius));
-            object.vel.mirrorAboutY();
-            object.vel.scale(object.restitutionCoeff);
-        }
-        // collision with left wall
-        else if (object.pos.x() - object.radius < BOUNDS.left)
-        {
-            object.pos.setX(float(BOUNDS.left + object.radius));
-            object.vel.mirrorAboutY();
-            object.vel.scale(object.restitutionCoeff);
-        }
-        // collision with ceiling
-        if (object.pos.y() - object.radius < BOUNDS.up)
-        {
-            object.pos.setY(float(BOUNDS.up + object.radius));
-            object.vel.mirrorAboutX();
-            object.vel.scale(object.restitutionCoeff);
-        }
-        // collision with floor
-        else if (object.pos.y() + object.radius > BOUNDS.down)
-        {
-            object.pos.setY(float(BOUNDS.down - object.radius));
-            object.vel.mirrorAboutX();
-            object.vel.scale(object.restitutionCoeff);
-        }
-    }
-}
-
-/// <summary>
 /// Calls the <c>update</c> function on all objects.
 /// </summary>
 void Solver::updateObjects()
@@ -300,7 +262,7 @@ void Solver::updateSolver()
     for (int substep = 0; substep < SUBSTEPS; substep++)
     {
         applyGravity();
-        applyBounds();
+        BOUNDS.applyBounds(objects);
         applyCollisions();
         applyRestitution();
         updateObjects();
