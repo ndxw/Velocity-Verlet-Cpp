@@ -3,7 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/System/Clock.hpp>
 
-int Circle::MAX_RADIUS = 10;
+int Circle::MAX_RADIUS = 20;
 int Circle::MIN_RADIUS = 10;
 
 int main()
@@ -21,10 +21,13 @@ int main()
 
     sf::Text displayFps;
     displayFps.setFont(font);
+    displayFps.setPosition(10.f, 10.f);
+    displayFps.setCharacterSize(20);
+    displayFps.setFillColor(sf::Color::White);
 
     // configure solver parameters
     Solver solver = Solver();
-    solver.setGravity(Vec2D(0.f, 1000.f));
+    solver.setGravity(Vec2D(0.f, 3000.f));
     solver.setBounds(RectBounds(0, WINDOW_W, 0, WINDOW_H));
     solver.setFramerate(60);
     solver.setSubsteps(4);
@@ -49,6 +52,10 @@ int main()
                 // update the view to the new size of the window
                 sf::FloatRect visibleArea(0, 0, float(event.size.width), float(event.size.height));
                 window.setView(sf::View(visibleArea));
+                solver.getBounds()->right = int(event.size.width);
+                solver.getBounds()->down = int(event.size.height);
+                solver.getGrid()->setGridWidth(int(event.size.width));
+                solver.getGrid()->setGridHeight(int(event.size.width));
             }
         }
 
@@ -58,7 +65,7 @@ int main()
             Circle::generateRandomObject(circle);
             solver.addObject(circle);
             spawnTimer.restart();
-            if (framerate < 30) break;
+            //if (framerate < 30) break;
         }
 
         window.clear();
@@ -73,12 +80,10 @@ int main()
         // update fps and object counter every second
         if (infoUpdate.getElapsedTime().asSeconds() >= 1.f) {
             displayFps.setString(std::to_string(framerate) + " fps\nObjects: " + std::to_string(solver.getObjectCount()));
-            displayFps.setPosition(10.f, 10.f);
-            displayFps.setCharacterSize(20);
-            displayFps.setFillColor(sf::Color::White);
             infoUpdate.restart();
         }
         window.draw(displayFps);    // but still need to draw text every loop
+
         window.display();
     }
     // final fps and object count

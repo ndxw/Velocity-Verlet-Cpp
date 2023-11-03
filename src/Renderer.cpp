@@ -2,12 +2,16 @@
 #include <cmath>
 #include <SFML/System/Vector2.hpp>
 
-
-void Renderer::render(const Solver &solver, sf::RenderWindow &window)
+/// <summary>
+/// Draws all objects from a <c>solver</c> to a <c>window</c>.
+/// </summary>
+/// <param name="solver"></param>
+/// <param name="window"></param>
+void Renderer::render(Solver &solver, sf::RenderWindow &window)
 {
     // render bounding box=====================================================
-    RectBounds bounds = solver.getBounds();
-    sf::RectangleShape boundingBox = sf::RectangleShape(sf::Vector2f(float(bounds.right - bounds.left), float(bounds.up - bounds.down)));
+    RectBounds* bounds = solver.getBounds();
+    sf::RectangleShape boundingBox = sf::RectangleShape(sf::Vector2f(float(bounds->right - bounds->left), float(bounds->up - bounds->down)));
     boundingBox.setFillColor(sf::Color::White);
     window.draw(boundingBox);
 

@@ -6,8 +6,8 @@
 
 class Renderer
 {
-    public:
-        static void render(const Solver &, sf::RenderWindow &);
+public:
+    static void render(Solver &, sf::RenderWindow &);
 };
 
 #endif

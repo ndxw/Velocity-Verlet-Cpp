@@ -1,30 +1,49 @@
 #include "../include/Objects.h"
 #include <cmath>
+#include <iostream>
 
 
 /*
 ====================================================================================
-OBJECT class
-    - position, velocity, acceleration
-    - mass
-    - restitution
-    - colour
+CIRCLE class
+    Data class containing P.V.A., color, radius, etc.
 ====================================================================================
 */
 
-Object::Object()
+/// <summary>
+/// Constructs a predefined <c>Circle</c> with:
+///     position = (100, 100)
+///     velocity = (2000, 0)
+///     acceleration = (0, 0)
+///     mass = MAX_RADIUS
+///     coefficient of restitution = 0.95
+///     colour = (255, 0, 0)
+///     radius = MAX_RADIUS 
+/// </summary>
+Circle::Circle() 
 {
     this->pos = Vec2D(100.0, 100.0);
     this->vel = Vec2D(2000.0, 0.0);
     this->acl = Vec2D(0.0, 0.0);
-    this->mass = 10;
+    this->mass = float(MAX_RADIUS);
     this->restitutionCoeff = 0.95f;
     this->colour = sf::Color::Red;
+    this->radius = MAX_RADIUS;
 }
 
-Object::Object(const Vec2D &pos, const Vec2D &vel, const Vec2D &acl, 
+/// <summary>
+/// Constructs a <c>Circle</c> with the given parameters.
+/// </summary>
+/// <param name="pos">Initial position of the object.</param>
+/// <param name="vel">Initial velocity of the object.</param>
+/// <param name="acl">Initial acceleration of the object.</param>
+/// <param name="mass">Mass of the object. Used for calculating post-collision velocities. Must be greater than 0.</param>
+/// <param name="restitutionCoeff">Coefficient of restitution of the object. Used for calculating post-collision velocities. Must be a value between 0 and 1 inclusive.</param>
+/// <param name="colour">Object display colour.</param>
+/// <param name="radius">Object radius. Must be a value between <c>"MIN_RADIUS</c> and <c>MAX_RADIUS</c> inclusive.</param>
+Circle::Circle(const Vec2D &pos, const Vec2D &vel, const Vec2D &acl, 
                 const float mass, const float restitutionCoeff, 
-                const sf::Color &colour)
+                const sf::Color &colour, const int radius)
 {
     this->pos = pos;
     this->vel = vel;
@@ -32,9 +51,14 @@ Object::Object(const Vec2D &pos, const Vec2D &vel, const Vec2D &acl,
     this->mass = mass;
     this->restitutionCoeff = restitutionCoeff;
     this->colour = colour;
+    this->radius = radius;
 }
 
-void Object::update(float dt)
+/// <summary>
+/// Calculates an objects position and velocity in the next frame based on its current position, velocity, and acceleration.
+/// </summary>
+/// <param name="dt">The elapsed time between frames, in seconds.</param>
+void Circle::update(float dt)
 {
     /*
     Equations for Velocity-Verlet integration can be
@@ -52,45 +76,47 @@ void Object::update(float dt)
 
     // calculate new velocity
     Vec2D::add(vel, halfV, halfADt);
-
 }
 
-
-/*
-====================================================================================
-CIRCLE class, extends OBJECT
-    Adds radius attribute; also holds information regarding
-    the values radius can take.
-====================================================================================
-*/
-
-Circle::Circle() : Object()
-{
-    this->radius = MAX_RADIUS;
-}
-
-Circle::Circle(const Vec2D &pos, const Vec2D &vel, const Vec2D &acl, 
-                const float mass, const float restitutionCoeff, 
-                const sf::Color &colour, const int radius) : Object(pos, vel, acl, mass, restitutionCoeff, colour)
-{
-    this->radius = radius;
-}
-
+/// <summary>
+/// Setter for <c>MAX_RADIUS</c>.
+/// </summary>
+/// <param name="radius">Must be a value between <c>MIN_RADIUS</c> and 300 inclusive.</param>
 void Circle::setMaxRadius(int radius)
 {
     radius = std::min(radius, 300);
+    radius = std::max(MIN_RADIUS, radius);
     MAX_RADIUS = radius;
+    std::cout << "Maximum object radius set to " << MAX_RADIUS << std::endl;
 }
 
+/// <summary>
+/// Setter for <c>MIN_RADIUS</c>.
+/// </summary>
+/// <param name="radius">Must be a value between 1 and <c>MAX_RADIUS</c> inclusive.</param>
 void Circle::setMinRadius(int radius)
 {
     radius = std::max(radius, 1);
+    radius = std::min(MAX_RADIUS, radius);
     MIN_RADIUS = radius;
+    std::cout << "Minimum object radius set to " << MIN_RADIUS << std::endl;
 }
 
+/// <summary>
+/// Getter for <c>MAX_RADIUS</c>.
+/// </summary>
+/// <returns>The maximum radius an object can have.</returns>
 int Circle::getMaxRadius() { return MAX_RADIUS; }
+/// <summary>
+/// Getter for <c>MIN_RADIUS</c>.
+/// </summary>
+/// <returns>The minimum radius an object can have.</returns>
 int Circle::getMinRadius() { return MIN_RADIUS; }
 
+/// <summary>
+/// Generates an object with with random <c>colour</c>, <c>radius</c>, and <c>mass</c>.
+/// </summary>
+/// <param name="circle">The output <c>Circle</c> object.</param>
 void Circle::generateRandomObject(Circle &circle)
 {
     sf::Color randomColor = sf::Color(rand()%256, rand()%256, rand()%256);
@@ -100,7 +126,11 @@ void Circle::generateRandomObject(Circle &circle)
     circle.mass = randomRadius;
 }
 
-std::string Circle::toString() {
+/// <summary>
+/// Converts an object to string format.
+/// </summary>
+/// <returns>A string containing information on all of an object's parameters.</returns>
+std::string Circle::toString() const {
     std::string objectString("");
     objectString += "P: " + pos.toString();
     objectString += "\t\tV: " + vel.toString();
@@ -124,6 +154,10 @@ RECTANGULAR BOUNDS class
           positive y-axis.
 ====================================================================================
 */
+
+/// <summary>
+/// Constructs a rectangle with dimensions (700, 700) with the upper-left corner at (0, 0).
+/// </summary>
 RectBounds::RectBounds()
 {
     this->left = 0;
@@ -132,6 +166,13 @@ RectBounds::RectBounds()
     this->down = 700;
 }
 
+/// <summary>
+/// Constructs a rectangle with the given bounds.
+/// </summary>
+/// <param name="left"></param>
+/// <param name="right"></param>
+/// <param name="up"></param>
+/// <param name="down"></param>
 RectBounds::RectBounds(int left, int right, int up, int down)
 {
     this->left = left;
@@ -140,4 +181,6 @@ RectBounds::RectBounds(int left, int right, int up, int down)
     this->down = down;
 }
 
-RectBounds::~RectBounds() {}
+std::string RectBounds::toString() const {
+    return "Bounds:\n\tleft: " + std::to_string(left) + "\t\tright: " + std::to_string(right) + "\t\tup: " + std::to_string(up) + "\t\tdown: " + std::to_string(down);
+}

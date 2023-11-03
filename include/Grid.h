@@ -15,10 +15,20 @@ public:
 	Grid();
 	Grid(int, int, int);
 
+	void setGridWidth(const int);
+	void setGridHeight(const int);
+
 	void resetCells();
 	int positionToCellIdx(const Vec2D&);
-	void partitionObjects(std::vector<Circle>&);
+	void partitionObjects(std::vector<Circle>&, const RectBounds&);
+
+	bool isTopRow(int);
+	bool isBottomRow(int);
+	bool isLeftCol(int);
+	bool isRightCol(int);
+
 	std::string toString();
+	std::string info();
 };
 
 #endif

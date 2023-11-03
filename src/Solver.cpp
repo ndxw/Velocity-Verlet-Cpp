@@ -3,6 +3,15 @@
 #include <thread>
 #include <cmath>
 
+/// <summary>
+/// Constructs a solver environment with the following parameters:
+///     <c>GRAVITY</c>: (0, 3000)px/s/s
+///     <c>BOUNDS</c>: (0, 700, 0, 700) px
+///     <c>FRAMERATE</c>: 60 fps
+///     <c>SUBSTEPS</c>: 1
+///     <c>MAX_OBJECTS</c>: 100
+///     <c>SPAWN_INTERVAL</c>: 1 second
+/// </summary>
 Solver::Solver()
 {
     time = 0.f;
@@ -18,35 +27,53 @@ Solver::Solver()
     SPAWN_INTERVAL = 1.f;
 }
 
-Solver::~Solver() {}
-
+/// <summary>
+/// Setter for <c>GRAVITY</c>.
+/// </summary>
+/// <param name="gravity"></param>
 void Solver::setGravity(const Vec2D& gravity)
 {
     GRAVITY = gravity;
 }
 
+/// <summary>
+/// Setter for <c>BOUNDS</c>.
+/// </summary>
+/// <param name="bounds"></param>
 void Solver::setBounds(const RectBounds& bounds)
 {
     BOUNDS = bounds;
 }
 
+/// <summary>
+/// Setter for <c>FRAMERATE</c>.
+/// </summary>
+/// <param name="framerate">Must be a value between 30 and 240 inclusive.</param>
 void Solver::setFramerate(int framerate)
 {
-    framerate = std::max(framerate, 0);
+    framerate = std::max(framerate, 30);
     framerate = std::min(framerate, 240);
     FRAMERATE = framerate;
     DT = 1 / float(FRAMERATE);
     SUBDT = DT / float(SUBSTEPS);
 }
 
+/// <summary>
+/// Setter for <c>SUBSTEPS</c>. This is the number of times bounds checking, collision detection, and object updates will be performed for each frame. Higher values will reduce object intersection at the cost of framerate.
+/// </summary>
+/// <param name="substeps">Must be a value between 1 and 16 inclusive.</param>
 void Solver::setSubsteps(int substeps)
 {
-    substeps = std::max(substeps, 0);
+    substeps = std::max(substeps, 1);
     substeps = std::min(substeps, 16);
     SUBSTEPS = substeps;
     SUBDT = DT / float(SUBSTEPS);
 }
 
+/// <summary>
+/// Setter for <c>MAX_OBJECTS</c>. Solver will stop spawning objects once this limit has been reached.
+/// </summary>
+/// <param name="maxObjects">Must be a value greater than or equal to 0.</param>
 void Solver::setMaxObjects(int maxObjects)
 {
     maxObjects = std::max(maxObjects, 0);
@@ -54,13 +81,18 @@ void Solver::setMaxObjects(int maxObjects)
     objects.reserve(MAX_OBJECTS);
 }
 
+/// <summary>
+/// Setter for <c>SPAWN_INTERVAL</c>. This is the rate at which the solver will spawn objects, in seconds.
+/// </summary>
+/// <param name="interval">Must be a value greater than or equal to 0.001 seconds.</param>
 void Solver::setSpawnInterval(float interval)
 {
     interval = std::max(interval, 0.001f);
     SPAWN_INTERVAL = interval;
 }
 
-const RectBounds& Solver::getBounds() const { return BOUNDS; }
+RectBounds* Solver::getBounds()             { return &BOUNDS; }
+Grid* Solver::getGrid()                     { return &grid; }
 int Solver::getFramerate() const            { return FRAMERATE; }
 int Solver::getSubsteps() const             { return SUBSTEPS; }
 int Solver::getMaxObjects() const           { return MAX_OBJECTS; }
@@ -68,6 +100,9 @@ float Solver::getSpawnInterval() const      { return SPAWN_INTERVAL; }
 int Solver::getObjectCount() const          { return int(objects.size()); }
 const std::vector<Circle>& Solver::getObjects() const { return objects; }
 
+/// <summary>
+/// Sets object acceleration value to that of <c>GRAVITY</c>.
+/// </summary>
 void Solver::applyGravity()
 {
     for (auto &object : objects)
@@ -77,9 +112,12 @@ void Solver::applyGravity()
     }
 }
 
+/// <summary>
+/// Partitions objects into grid cells and creates threads to perform collision detection on the objects.
+/// </summary>
 void Solver::applyCollisions()
 {
-    grid.partitionObjects(objects);
+    grid.partitionObjects(objects, BOUNDS);
 
     // should be solver attributes
     int threadCount = 4;
@@ -101,11 +139,16 @@ void Solver::applyCollisions()
     grid.resetCells();
 }
 
+/// <summary>
+/// The thread function that performs collision detection.
+/// </summary>
+/// <param name="startCellIdx">Always in the bottom row of cells by design.</param>
+/// <param name="endCellIdx">Always in the top row of cells by design.</param>
 void Solver::collisionDetectionThread(int startCellIdx, int endCellIdx) {
 
     for (int cellIdx = startCellIdx; cellIdx < endCellIdx; cellIdx++) {
-        if (isLeftCol(cellIdx) || isRightCol(cellIdx) ||
-            isTopRow(cellIdx) || isBottomRow(cellIdx)) continue;
+        if (grid.isLeftCol(cellIdx) || grid.isRightCol(cellIdx) ||
+            grid.isTopRow(cellIdx) || grid.isBottomRow(cellIdx)) continue;
 
         // create list of obj in current and adjacent cells
         int kernelCells[9] = { cellIdx - grid.HEIGHT - 1, cellIdx - grid.HEIGHT, cellIdx - grid.HEIGHT + 1,
@@ -176,6 +219,9 @@ void Solver::collisionDetectionThread(int startCellIdx, int endCellIdx) {
     }
 }
 
+/// <summary>
+/// Keeps objects within the <c>BOUNDS</c>.
+/// </summary>
 void Solver::applyBounds()
 {
     for (auto &object : objects)
@@ -211,11 +257,17 @@ void Solver::applyBounds()
     }
 }
 
+/// <summary>
+/// Calls the <c>update</c> function on all objects.
+/// </summary>
 void Solver::updateObjects()
 {
     for (auto &object : objects) { object.update(SUBDT); }
 }
 
+/// <summary>
+/// Applies the coefficient of restitution to the velocities of objects that underwent collision this frame.
+/// </summary>
 void Solver::applyRestitution()
 {
     /*
@@ -231,11 +283,18 @@ void Solver::applyRestitution()
     }
 }
 
+/// <summary>
+/// Adds a <c>Circle</c> object to the solver environment.
+/// </summary>
+/// <param name="obj"></param>
 void Solver::addObject(const Circle &obj)
 {
     objects.push_back(obj);
 }
 
+/// <summary>
+/// Calls all the necessary functions <c>SUBSTEPS</c> times to calculate the objects' parameters in the succeeding frame. 
+/// </summary>
 void Solver::updateSolver()
 {
     for (int substep = 0; substep < SUBSTEPS; substep++)
@@ -249,7 +308,3 @@ void Solver::updateSolver()
     time += DT;
 }
 
-bool Solver::isTopRow(int cellIdx) { return (cellIdx % grid.HEIGHT) == (grid.HEIGHT - 1); }
-bool Solver::isBottomRow(int cellIdx) { return (cellIdx % grid.HEIGHT) == 0; }
-bool Solver::isLeftCol(int cellIdx) { return cellIdx < grid.HEIGHT; }
-bool Solver::isRightCol(int cellIdx) { return cellIdx >= (grid.cells.size() - grid.HEIGHT); }
