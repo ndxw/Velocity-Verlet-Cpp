@@ -2,7 +2,7 @@
 #define OBJECTS_H
 
 #include "Vec2D.h"
-#include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics.hpp>
 #include <vector>
 
 class Circle
@@ -34,6 +34,7 @@ public:
 
     static void generateRandomObject(Circle&);
 
+
     std::string toString() const;
 };
 
@@ -52,5 +53,7 @@ public:
 
     std::string toString() const;
 };
+
+
 
 #endif

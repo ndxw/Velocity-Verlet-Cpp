@@ -14,15 +14,12 @@
 /// </summary>
 Solver::Solver()
 {
-    time = 0.f;
     objects.clear();
     GRAVITY = Vec2D(0.f, 3000.f);
     BOUNDS = RectBounds();
     grid = Grid(Circle::getMaxRadius(), BOUNDS.right, BOUNDS.down);
     FRAMERATE = 60;
     SUBSTEPS = 1;
-    DT = 1 / float(FRAMERATE);
-    SUBDT = DT / float(SUBSTEPS);
     MAX_OBJECTS = 100;
     SPAWN_INTERVAL = 1.f;
 }
@@ -54,8 +51,6 @@ void Solver::setFramerate(int framerate)
     framerate = std::max(framerate, 30);
     framerate = std::min(framerate, 240);
     FRAMERATE = framerate;
-    DT = 1 / float(FRAMERATE);
-    SUBDT = DT / float(SUBSTEPS);
 }
 
 /// <summary>
@@ -67,7 +62,6 @@ void Solver::setSubsteps(int substeps)
     substeps = std::max(substeps, 1);
     substeps = std::min(substeps, 16);
     SUBSTEPS = substeps;
-    SUBDT = DT / float(SUBSTEPS);
 }
 
 /// <summary>
@@ -128,7 +122,7 @@ void Solver::applyCollisions()
     std::vector<std::thread*> threadPool;
     for (int thread = 0; thread < threadCount; thread++) {
         int startCellIdx = thread * cellsPerThread;
-        int endCellIdx = (thread == threadCount - 1) ? (int)grid.cells.size() : startCellIdx + cellsPerThread;
+        int endCellIdx = (thread == threadCount - 1) ? int(grid.cells.size()) : startCellIdx + cellsPerThread;
         std::thread* th_collision = new std::thread(&Solver::collisionDetectionThread, this, startCellIdx, endCellIdx);
         threadPool.push_back(th_collision);
     }
@@ -222,9 +216,9 @@ void Solver::collisionDetectionThread(int startCellIdx, int endCellIdx) {
 /// <summary>
 /// Calls the <c>update</c> function on all objects.
 /// </summary>
-void Solver::updateObjects()
+void Solver::updateObjects(float subdt)
 {
-    for (auto &object : objects) { object.update(SUBDT); }
+    for (auto &object : objects) { object.update(subdt); }
 }
 
 /// <summary>
@@ -257,16 +251,20 @@ void Solver::addObject(const Circle &obj)
 /// <summary>
 /// Calls all the necessary functions <c>SUBSTEPS</c> times to calculate the objects' parameters in the succeeding frame. 
 /// </summary>
-void Solver::updateSolver()
+void Solver::updateSolver(float dt)
 {
+    float subdt = dt / float(SUBSTEPS);
+
     for (int substep = 0; substep < SUBSTEPS; substep++)
     {
         applyGravity();
         BOUNDS.applyBounds(objects);
         applyCollisions();
         applyRestitution();
-        updateObjects();
+        updateObjects(subdt);
     }
-    time += DT;
 }
 
+void Solver::clearObjects() {
+    objects.clear();
+}

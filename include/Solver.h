@@ -7,23 +7,19 @@
 class Solver
 {
 private:
-    float time;                     // seconds
-        
     std::vector<Circle> objects;
     Grid grid;
     Vec2D GRAVITY;
     RectBounds BOUNDS;
     int FRAMERATE;                  // fps
     int SUBSTEPS;
-    float DT;                       // seconds
-    float SUBDT;                    // seconds
     int MAX_OBJECTS;
     float SPAWN_INTERVAL;           // seconds
 
     void applyGravity();
     void applyCollisions();
     void applyRestitution();
-    void updateObjects();
+    void updateObjects(float);
 
     void collisionDetectionThread(int, int);
         
@@ -47,7 +43,9 @@ public:
     const std::vector<Circle>& getObjects() const;
         
     void addObject(const Circle &);
-    void updateSolver();
+    void updateSolver(float);
+
+    void clearObjects();
 };
 
 #endif

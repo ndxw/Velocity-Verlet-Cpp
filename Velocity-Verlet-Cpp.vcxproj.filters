@@ -30,6 +30,9 @@
     <ClInclude Include="include\Vec2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Taskbar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -50,10 +53,30 @@
     <ClCompile Include="src\Vec2D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Taskbar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Font Include="resources\arial.ttf">
       <Filter>Resource Files</Filter>
     </Font>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="resources\pause-button.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resources\play-button.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resources\restart-button.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resources\auto-spawn-on-button.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resources\auto-spawn-off-button.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

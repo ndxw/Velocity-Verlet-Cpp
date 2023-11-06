@@ -23,6 +23,7 @@
     <ClInclude Include="include\Objects.h" />
     <ClInclude Include="include\Renderer.h" />
     <ClInclude Include="include\Solver.h" />
+    <ClInclude Include="include\Taskbar.h" />
     <ClInclude Include="include\Vec2D.h" />
   </ItemGroup>
   <ItemGroup>
@@ -31,10 +32,18 @@
     <ClCompile Include="src\Objects.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\Solver.cpp" />
+    <ClCompile Include="src\Taskbar.cpp" />
     <ClCompile Include="src\Vec2D.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="resources\arial.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="resources\auto-spawn-off-button.png" />
+    <Image Include="resources\auto-spawn-on-button.png" />
+    <Image Include="resources\pause-button.png" />
+    <Image Include="resources\play-button.png" />
+    <Image Include="resources\restart-button.png" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

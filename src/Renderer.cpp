@@ -11,8 +11,8 @@ void Renderer::render(Solver &solver, sf::RenderWindow &window)
 {
     // render bounding box=====================================================
     RectBounds* bounds = solver.getBounds();
-    sf::RectangleShape boundingBox = sf::RectangleShape(sf::Vector2f(float(bounds->right - bounds->left), float(bounds->up - bounds->down)));
-    boundingBox.setFillColor(sf::Color::White);
+    sf::RectangleShape boundingBox = sf::RectangleShape(sf::Vector2f(float(bounds->right - bounds->left), float(bounds->down - bounds->up)));
+    boundingBox.setFillColor(sf::Color(40, 40, 40));
     window.draw(boundingBox);
 
     // render objects==========================================================
