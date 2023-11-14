@@ -56,26 +56,29 @@
     <ClCompile Include="src\Taskbar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\ControlPanel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Font Include="resources\arial.ttf">
+    <Font Include="resources\fonts\arial.ttf">
       <Filter>Resource Files</Filter>
     </Font>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="resources\pause-button.png">
+    <Image Include="resources\sprites\auto-spawn-off-button.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="resources\play-button.png">
+    <Image Include="resources\sprites\auto-spawn-on-button.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="resources\restart-button.png">
+    <Image Include="resources\sprites\pause-button.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="resources\auto-spawn-on-button.png">
+    <Image Include="resources\sprites\play-button.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="resources\auto-spawn-off-button.png">
+    <Image Include="resources\sprites\restart-button.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

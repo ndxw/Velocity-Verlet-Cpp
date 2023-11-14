@@ -7,7 +7,7 @@
 /// </summary>
 /// <param name="solver"></param>
 /// <param name="window"></param>
-void Renderer::render(Solver &solver, sf::RenderWindow &window)
+void Renderer::renderSolver(Solver &solver, sf::RenderWindow &window)
 {
     // render bounding box=====================================================
     RectBounds* bounds = solver.getBounds();

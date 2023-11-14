@@ -7,7 +7,7 @@
 class Renderer
 {
 public:
-    static void render(Solver &, sf::RenderWindow &);
+    static void renderSolver(Solver &, sf::RenderWindow &);
 };
 
 #endif
