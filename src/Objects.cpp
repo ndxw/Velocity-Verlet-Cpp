@@ -222,3 +222,29 @@ void RectBounds::applyBounds(std::vector<Circle>& objects) const {
 std::string RectBounds::toString() const {
     return "Bounds:\n\tleft: " + std::to_string(left) + "\t\tright: " + std::to_string(right) + "\t\tup: " + std::to_string(up) + "\t\tdown: " + std::to_string(down);
 }
+
+
+Spawner::Spawner()
+{
+    this->id = "spawner";
+    this->pos = Vec2D(100, 100);
+    this->vel = Vec2D(2000, 0);
+    this->interval = 1.f;
+    this->timer = sf::Clock();
+    this->active = true;
+    this->visible = true;
+    this->colour = sf::Color::Black;
+}
+
+Spawner::Spawner(const std::string id, const Vec2D& pos, const Vec2D& vel,
+    const float interval, const bool active, const bool visible)
+{
+    this->id = id;
+    this->pos = pos;
+    this->vel = vel;
+    this->interval = interval;
+    this->timer = sf::Clock();
+    this->active = active;
+    this->visible = visible;
+    this->colour = sf::Color::Black;
+}

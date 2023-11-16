@@ -17,8 +17,8 @@ public:
     Vec2D acl;
     float mass;
     float restitutionCoeff;
-    sf::Color colour;
     bool collided = false;
+    sf::Color colour;
     int radius;
 
     Circle();
@@ -55,5 +55,20 @@ public:
 };
 
 
+class Spawner
+{
+public:
+    std::string id;
+    Vec2D pos;
+    Vec2D vel;
+    float interval;
+    sf::Clock timer;
+    bool active;
+    bool visible;
+    sf::Color colour;
+
+    Spawner();
+    Spawner(const std::string id, const Vec2D& pos, const Vec2D& vel, const float interval, const bool active, const bool visible);
+};
 
 #endif

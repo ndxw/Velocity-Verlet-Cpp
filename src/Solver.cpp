@@ -3,6 +3,8 @@
 #include <thread>
 #include <cmath>
 
+#include <QtWidgets/qmessagebox.h>
+
 /// <summary>
 /// Constructs a solver environment with the following parameters:
 ///     <c>GRAVITY</c>: (0, 3000)px/s/s
@@ -22,7 +24,10 @@ Solver::Solver()
     SUBSTEPS = 1;
     MAX_OBJECTS = 100;
     SPAWN_INTERVAL = 1.f;
+    paused = false;
+    autoSpawning = true;
 }
+
 
 /// <summary>
 /// Setter for <c>GRAVITY</c>.
@@ -243,16 +248,16 @@ void Solver::applyRestitution()
 /// Adds a <c>Circle</c> object to the solver environment.
 /// </summary>
 /// <param name="obj"></param>
-void Solver::addObject(const Circle &obj)
-{
-    objects.push_back(obj);
-}
+void Solver::addObject(const Circle &obj){ objects.push_back(obj); }
+
+void Solver::addSpawner(const Spawner& spawner) { spawners.push_back(spawner); }
 
 /// <summary>
 /// Calls all the necessary functions <c>SUBSTEPS</c> times to calculate the objects' parameters in the succeeding frame. 
 /// </summary>
 void Solver::updateSolver(float dt)
 {
+    if (paused) return;
     float subdt = dt / float(SUBSTEPS);
 
     for (int substep = 0; substep < SUBSTEPS; substep++)
@@ -263,8 +268,22 @@ void Solver::updateSolver(float dt)
         applyRestitution();
         updateObjects(subdt);
     }
+
+    if (!autoSpawning) return;
+    for (Spawner& spawner : spawners) {
+        if (objects.size() >= MAX_OBJECTS) break;
+
+        if (spawner.timer.getElapsedTime().asSeconds() >= spawner.interval) {
+            Circle circle = Circle();
+            Circle::generateRandomObject(circle);
+            circle.pos = spawner.pos;
+            circle.vel = spawner.vel;
+            addObject(circle);
+            spawner.timer.restart();
+        }
+    }
 }
 
-void Solver::clearObjects() {
-    objects.clear();
-}
+void Solver::restart() { objects.clear(); }
+void Solver::togglePause() { paused = !paused; }
+void Solver::setAutoSpawning(bool value) { autoSpawning = value; }

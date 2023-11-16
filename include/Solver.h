@@ -3,11 +3,16 @@
 
 #include "Objects.h"
 #include "Grid.h"
+#include <QtCore/qobject.h>
+#include <QtWidgets/qabstractbutton.h>
 
-class Solver
+class Solver : public QObject
 {
+    Q_OBJECT
+
 private:
     std::vector<Circle> objects;
+    std::vector<Spawner> spawners;
     Grid grid;
     Vec2D GRAVITY;
     RectBounds BOUNDS;
@@ -24,6 +29,9 @@ private:
     void collisionDetectionThread(int, int);
         
 public:
+    bool paused;
+    bool autoSpawning;
+
     Solver();
 
     void setGravity(const Vec2D&);
@@ -42,10 +50,16 @@ public:
     int getObjectCount() const;
     const std::vector<Circle>& getObjects() const;
         
-    void addObject(const Circle &);
+    void addObject(const Circle&);
+    void addSpawner(const Spawner&);
     void updateSolver(float);
 
-    void clearObjects();
+    
+
+public slots:
+    void restart();
+    void togglePause();
+    void setAutoSpawning(bool);
 };
 
 #endif
