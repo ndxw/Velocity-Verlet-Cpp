@@ -12,8 +12,8 @@
 
 int Circle::MAX_RADIUS = 20;
 int Circle::MIN_RADIUS = 10;
-const int WINDOW_W = 700;
-const int WINDOW_H = 700;
+const int WINDOW_W = sf::VideoMode::getDesktopMode().width / 2;
+const int WINDOW_H = sf::VideoMode::getDesktopMode().height * 0.8;
 
 
 void solverThread(Solver& solver, Renderer& renderer) 
@@ -37,6 +37,7 @@ void solverThread(Solver& solver, Renderer& renderer)
     // configure window parameters
     sf::RenderWindow window(sf::VideoMode(WINDOW_W, WINDOW_H), "Simulation Window");
     window.setFramerateLimit(solver.getFramerate());
+    //window.setPosition(sf::Vector2i(0, 0));
 
     // start render loop
     while (window.isOpen()) {

@@ -18,6 +18,7 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="include\ControlPanel.h" />
+    <QtMoc Include="include\CustomWidgets.h" />
     <ClInclude Include="include\Grid.h" />
     <ClInclude Include="include\Objects.h" />
     <QtMoc Include="include\Renderer.h" />
@@ -37,6 +38,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\ControlPanel.cpp" />
+    <ClCompile Include="src\CustomWidgets.cpp" />
     <ClCompile Include="src\Grid.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Objects.cpp" />

@@ -21,16 +21,30 @@ private:
 
 	QVBoxLayout* globalLayout;
 	QHBoxLayout* bgBallLayout;
+	QHBoxLayout* paramSpawnLayout;
 
 	QHBoxLayout* taskbarLayout;
 	QGridLayout* bgColourLayout;
 	QGridLayout* ballColourLayout;
+	QGridLayout* parameterLayout;
 	QVBoxLayout* spawningLayout;
 
 	// taskbar widgets
 	QPushButton* pauseButton;
 	QPushButton* restartButton;
 	QMessageBox* restartDialog;
+
+	// parameter inputs
+	//QComboBox* fpsDropdown;
+	QLineEdit* substepsInput;
+	QLineEdit* maxObjectsInput;
+	QLineEdit* gXInput;
+	QLineEdit* gYInput;
+	// current parameter values
+	QLabel* fps;
+	QLabel* substeps;
+	QLabel* maxObjects;
+	QLabel* gravity;
 
 	// spawner form inputs
 	QLineEdit* posXInput;
@@ -51,6 +65,7 @@ public:
 	void initTaskbar(Solver* solver);
 	void initBgColour(Renderer* renderer);
 	void initBallColour(Renderer* renderer);
+	void initParameter(Solver* solver);
 	void initSpawning(Solver* solver);
 
 signals:

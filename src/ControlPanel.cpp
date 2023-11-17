@@ -1,4 +1,5 @@
 #include "../include/ControlPanel.h"
+#include "../include/CustomWidgets.h"
 
 #include <QtWidgets/qslider.h>
 #include <QtWidgets/qlabel.h>
@@ -8,6 +9,7 @@
 #include <QtWidgets/qlineedit.h>
 #include <QtWidgets/qbuttongroup.h>
 #include <QtWidgets/qgroupbox.h>
+#include <QtWidgets/qcombobox.h>
 
 #include <QtCore/qregularexpression.h>
 
@@ -222,6 +224,36 @@ void ControlPanel::initBallColour(Renderer* renderer)
 	randomRadio->setChecked(true);
 }
 
+void ControlPanel::initParameter(Solver* solver)
+{
+	// framerate
+	/*fpsDropdown = new QComboBox(this);
+	fpsDropdown->addItem("12");
+	fpsDropdown->addItem("24");
+	fpsDropdown->addItem("30");
+	fpsDropdown->addItem("48");
+	fpsDropdown->addItem("60");
+	fpsDropdown->addItem("120");
+	fpsDropdown->addItem("144");
+	fpsDropdown->addItem("240");*/
+
+	// substeps
+	substepsInput = new QLineEdit(this);
+	substepsInput->setValidator(new QIntValidator(1, 16, this));
+
+	// max objects
+	maxObjectsInput = new QLineEdit(this);
+	maxObjectsInput->setValidator(new QIntValidator(0, 1'000'000, this));
+
+	// gravity
+
+
+
+
+	// default values
+	//fpsDropdown->setCurrentIndex(4);	// 60 fps
+}
+
 void ControlPanel::initSpawning(Solver* solver)
 {
 	// separate spawning options buttons
@@ -232,11 +264,9 @@ void ControlPanel::initSpawning(Solver* solver)
 	spawningOptionsGroup->addButton(freeRadio, 1);
 
 	// spawner creation form
-	QGridLayout* spawnerFormLayout = new QGridLayout(this);
-
 	QLineEdit* idInput = new QLineEdit(this);
 	idInput->setPlaceholderText("ex. spawner1");
-	QRegularExpression idRe("^[a-zA-Z0-9_]+$");
+	QRegularExpression idRe("^[a-zA-Z0-9_-]+$");
 	QRegularExpressionValidator* idValidator = new QRegularExpressionValidator(idRe, this);
 	idInput->setValidator(idValidator);
 
@@ -253,10 +283,13 @@ void ControlPanel::initSpawning(Solver* solver)
 	posXInput->setValidator(doubleValidator);
 	posYInput->setValidator(doubleValidator);
 
+	posInputLayout->addStretch();
 	posInputLayout->addWidget(new QLabel("X"));
 	posInputLayout->addWidget(posXInput);
+	posInputLayout->addStretch();
 	posInputLayout->addWidget(new QLabel("Y"));
 	posInputLayout->addWidget(posYInput);
+	posInputLayout->setContentsMargins(0, 0, 0, 0);
 
 	// spawner velocity input
 	QWidget* velInput = new QWidget(this);
@@ -269,33 +302,50 @@ void ControlPanel::initSpawning(Solver* solver)
 	velXInput->setValidator(doubleValidator);
 	velYInput->setValidator(doubleValidator);
 
+	velInputLayout->addStretch();
 	velInputLayout->addWidget(new QLabel("X"));
 	velInputLayout->addWidget(velXInput);
+	velInputLayout->addStretch();
 	velInputLayout->addWidget(new QLabel("Y"));
 	velInputLayout->addWidget(velYInput);
+	velInputLayout->setContentsMargins(0, 0, 0, 0);
 
+	QPushButton* addButton = new QPushButton("Add", this);
+	QPushButton* clearButton = new QPushButton("Clear", this);
+	QHBoxLayout* spawnerFormButtonLayout = new QHBoxLayout(this);
+	spawnerFormButtonLayout->addStretch();
+	spawnerFormButtonLayout->addWidget(clearButton);
+	spawnerFormButtonLayout->addWidget(addButton);
+	spawnerFormButtonLayout->setContentsMargins(0, 0, 0, 0);
+
+	QGridLayout* spawnerFormLayout = new QGridLayout(this);
 	spawnerFormLayout->addWidget(new QLabel("ID:"),		  0, 0, Qt::AlignRight);
 	spawnerFormLayout->addWidget(new QLabel("Position:"), 1, 0, Qt::AlignRight);
 	spawnerFormLayout->addWidget(new QLabel("Velocity:"), 2, 0, Qt::AlignRight);
 	spawnerFormLayout->addWidget(idInput,  0, 1);
 	spawnerFormLayout->addWidget(posInput, 1, 1);
 	spawnerFormLayout->addWidget(velInput, 2, 1);
-	QPushButton* addButton = new QPushButton("Add", this);
+	spawnerFormLayout->addLayout(spawnerFormButtonLayout, 3, 1);
+	QGroupBox* spawnerFormGroup = new QGroupBox("Create Spawner");
+	spawnerFormGroup->setLayout(spawnerFormLayout);
+
+	
 
 	spawnerList = new QListWidget(this);
 
 	// add to layout
-	QHBoxLayout* spawningOptionsLayout = new QHBoxLayout(this);
-	spawningOptionsLayout->addStretch();
+	QVBoxLayout* spawningOptionsLayout = new QVBoxLayout(this);
 	spawningOptionsLayout->addWidget(autoRadio);
 	spawningOptionsLayout->addWidget(freeRadio);
 	spawningOptionsLayout->addStretch();
+
+	QHBoxLayout* spawnerOptionsFormLayout = new QHBoxLayout(this);
+	spawnerOptionsFormLayout->addLayout(spawningOptionsLayout);
+	spawnerOptionsFormLayout->addWidget(spawnerFormGroup);
 	
 
 	spawningLayout = new QVBoxLayout(this);
-	spawningLayout->addLayout(spawningOptionsLayout);
-	spawningLayout->addLayout(spawnerFormLayout);
-	spawningLayout->addWidget(addButton, 0, Qt::AlignRight);
+	spawningLayout->addLayout(spawnerOptionsFormLayout);
 	spawningLayout->addWidget(spawnerList);
 
 	// connect spawner radio buttons to solver
