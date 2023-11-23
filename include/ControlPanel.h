@@ -3,6 +3,7 @@
 
 #include "../include/Solver.h"
 #include "../include/Renderer.h"
+#include "../include/CustomWidgets.h"
 
 #include <QtWidgets/qwidget.h>
 #include <QtWidgets/qmainwindow.h>
@@ -11,6 +12,7 @@
 #include <QtWidgets/qpushbutton.h>
 #include <QtWidgets/qmessagebox.h>
 #include <QtWidgets/qlistwidget.h>
+#include <QtWidgets/qcombobox.h>
 
 class ControlPanel : public QMainWindow
 {
@@ -18,15 +20,17 @@ class ControlPanel : public QMainWindow
 
 private:
 	QString separationLineStyle = QString("background-color: #c0c0c0;");
+	QString invalid = QString("background-color: #ffb0b0");
+	QString valid = QString("background-color: white");
 
 	QVBoxLayout* globalLayout;
 	QHBoxLayout* bgBallLayout;
 	QHBoxLayout* paramSpawnLayout;
 
 	QHBoxLayout* taskbarLayout;
-	QGridLayout* bgColourLayout;
+	QHBoxLayout* bgColourLayout;
 	QGridLayout* ballColourLayout;
-	QGridLayout* parameterLayout;
+	QVBoxLayout* parameterLayout;
 	QVBoxLayout* spawningLayout;
 
 	// taskbar widgets
@@ -35,22 +39,20 @@ private:
 	QMessageBox* restartDialog;
 
 	// parameter inputs
-	//QComboBox* fpsDropdown;
+	QComboBox* fpsDropdown;
 	QLineEdit* substepsInput;
 	QLineEdit* maxObjectsInput;
-	QLineEdit* gXInput;
-	QLineEdit* gYInput;
-	// current parameter values
-	QLabel* fps;
-	QLabel* substeps;
-	QLabel* maxObjects;
-	QLabel* gravity;
+	VectorInput* gInput;
+
+	QLabel* paramStatus;
+
+	QPushButton* paramApplyButton;
 
 	// spawner form inputs
-	QLineEdit* posXInput;
-	QLineEdit* posYInput;
-	QLineEdit* velXInput;
-	QLineEdit* velYInput;
+	VectorInput* posInput;
+	VectorInput* velInput;
+	QPushButton* addButton;
+	QPushButton* clearButton;
 
 	// spawning widgets
 	QListWidget* spawnerList;
@@ -58,6 +60,7 @@ private:
 private slots:
 	void togglePauseButton();
 	void restartDialogHandler();
+	void updateParamDisplay();
 
 public:
 	ControlPanel(Solver* solver = 0, Renderer* renderer = 0);
@@ -70,7 +73,10 @@ public:
 
 signals:
 	void restartConfirmed();
-
+	void applyFramerate(int);
+	void applySubsteps(int);
+	void applyMaxObjects(int);
+	void applyGravity(float, float);
 };
 
 #endif

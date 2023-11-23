@@ -24,8 +24,23 @@ public:
 		Vertical
 	};
 
-	VectorInput(Orientation);
+	VectorInput(Orientation, QWidget*);
 
+	bool isIncomplete();
+	QString x();
+	QString y();
+
+signals:
+	void textChanged(const QString&, const QString&);
+
+private slots:
+	void xChanged(const QString&);
+	void yChanged(const QString&);
+
+public slots:
+	void clear();
+	void setXText(const QString&);
+	void setYText(const QString&);
 };
 
 class RGBInput : public QWidget
@@ -33,6 +48,7 @@ class RGBInput : public QWidget
 	Q_OBJECT
 
 private:
+	QGridLayout* rgbLayout;
 	QSlider* rSlider;
 	QSlider* gSlider;
 	QSlider* bSlider;
@@ -41,11 +57,16 @@ private:
 	QSpinBox* bSpinBox;
 
 public:
-	RGBInput();
+	RGBInput(QWidget*);
+
+signals:
+	void rValueChanged(int);
+	void gValueChanged(int);
+	void bValueChanged(int);
+
+public slots:
+	void setValues(int, int, int);
 };
-
-
-
 
 
 #endif

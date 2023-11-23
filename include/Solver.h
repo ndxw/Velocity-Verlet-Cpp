@@ -36,11 +36,9 @@ public:
 
     void setGravity(const Vec2D&);
     void setBounds(const RectBounds&);
-    void setFramerate(int);
-    void setSubsteps(int);
-    void setMaxObjects(int);
     void setSpawnInterval(float);
 
+    Vec2D getGravity() const;
     RectBounds* getBounds();
     Grid* getGrid();
     int getFramerate() const;
@@ -60,6 +58,11 @@ public slots:
     void restart();
     void togglePause();
     void setAutoSpawning(bool);
+    void setFramerate(int);
+    void setSubsteps(int);
+    void setMaxObjects(int);
+    void setGravity(float, float);
+
 };
 
 #endif

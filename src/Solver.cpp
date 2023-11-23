@@ -5,15 +5,6 @@
 
 #include <QtWidgets/qmessagebox.h>
 
-/// <summary>
-/// Constructs a solver environment with the following parameters:
-///     <c>GRAVITY</c>: (0, 3000)px/s/s
-///     <c>BOUNDS</c>: (0, 700, 0, 700) px
-///     <c>FRAMERATE</c>: 60 fps
-///     <c>SUBSTEPS</c>: 1
-///     <c>MAX_OBJECTS</c>: 100
-///     <c>SPAWN_INTERVAL</c>: 1 second
-/// </summary>
 Solver::Solver()
 {
     objects.clear();
@@ -21,75 +12,23 @@ Solver::Solver()
     BOUNDS = RectBounds();
     grid = Grid(Circle::getMaxRadius(), BOUNDS.right, BOUNDS.down);
     FRAMERATE = 60;
-    SUBSTEPS = 1;
-    MAX_OBJECTS = 100;
+    SUBSTEPS = 4;
+    MAX_OBJECTS = 300;
     SPAWN_INTERVAL = 1.f;
     paused = false;
     autoSpawning = true;
 }
 
+void Solver::setGravity(const Vec2D& gravity) { GRAVITY = gravity; }
+void Solver::setBounds(const RectBounds& bounds) { BOUNDS = bounds; }
 
-/// <summary>
-/// Setter for <c>GRAVITY</c>.
-/// </summary>
-/// <param name="gravity"></param>
-void Solver::setGravity(const Vec2D& gravity)
-{
-    GRAVITY = gravity;
-}
-
-/// <summary>
-/// Setter for <c>BOUNDS</c>.
-/// </summary>
-/// <param name="bounds"></param>
-void Solver::setBounds(const RectBounds& bounds)
-{
-    BOUNDS = bounds;
-}
-
-/// <summary>
-/// Setter for <c>FRAMERATE</c>.
-/// </summary>
-/// <param name="framerate">Must be a value between 30 and 240 inclusive.</param>
-void Solver::setFramerate(int framerate)
-{
-    framerate = std::max(framerate, 30);
-    framerate = std::min(framerate, 240);
-    FRAMERATE = framerate;
-}
-
-/// <summary>
-/// Setter for <c>SUBSTEPS</c>. This is the number of times bounds checking, collision detection, and object updates will be performed for each frame. Higher values will reduce object intersection at the cost of framerate.
-/// </summary>
-/// <param name="substeps">Must be a value between 1 and 16 inclusive.</param>
-void Solver::setSubsteps(int substeps)
-{
-    substeps = std::max(substeps, 1);
-    substeps = std::min(substeps, 16);
-    SUBSTEPS = substeps;
-}
-
-/// <summary>
-/// Setter for <c>MAX_OBJECTS</c>. Solver will stop spawning objects once this limit has been reached.
-/// </summary>
-/// <param name="maxObjects">Must be a value greater than or equal to 0.</param>
-void Solver::setMaxObjects(int maxObjects)
-{
-    maxObjects = std::max(maxObjects, 0);
-    MAX_OBJECTS = maxObjects;
-    objects.reserve(MAX_OBJECTS);
-}
-
-/// <summary>
-/// Setter for <c>SPAWN_INTERVAL</c>. This is the rate at which the solver will spawn objects, in seconds.
-/// </summary>
-/// <param name="interval">Must be a value greater than or equal to 0.001 seconds.</param>
 void Solver::setSpawnInterval(float interval)
 {
     interval = std::max(interval, 0.001f);
     SPAWN_INTERVAL = interval;
 }
 
+Vec2D Solver::getGravity() const            { return GRAVITY; }
 RectBounds* Solver::getBounds()             { return &BOUNDS; }
 Grid* Solver::getGrid()                     { return &grid; }
 int Solver::getFramerate() const            { return FRAMERATE; }
@@ -287,3 +226,25 @@ void Solver::updateSolver(float dt)
 void Solver::restart() { objects.clear(); }
 void Solver::togglePause() { paused = !paused; }
 void Solver::setAutoSpawning(bool value) { autoSpawning = value; }
+
+void Solver::setFramerate(int framerate) 
+{ 
+    FRAMERATE = framerate;
+}
+
+void Solver::setSubsteps(int substeps) {
+    substeps = std::max(1, substeps);
+    substeps = std::min(16, substeps);
+    SUBSTEPS = substeps;
+}
+
+void Solver::setMaxObjects(int maxObjects)
+{
+    MAX_OBJECTS = maxObjects;
+    objects.reserve(MAX_OBJECTS);
+}
+
+void Solver::setGravity(float x, float y)
+{
+    GRAVITY = Vec2D(x, y);
+}

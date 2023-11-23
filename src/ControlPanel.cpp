@@ -1,5 +1,6 @@
 #include "../include/ControlPanel.h"
-#include "../include/CustomWidgets.h"
+
+#include <string>
 
 #include <QtWidgets/qslider.h>
 #include <QtWidgets/qlabel.h>
@@ -9,7 +10,6 @@
 #include <QtWidgets/qlineedit.h>
 #include <QtWidgets/qbuttongroup.h>
 #include <QtWidgets/qgroupbox.h>
-#include <QtWidgets/qcombobox.h>
 
 #include <QtCore/qregularexpression.h>
 
@@ -37,6 +37,10 @@ ControlPanel::ControlPanel(Solver* solver, Renderer* renderer)
 	QGroupBox* ballColourGroup = new QGroupBox("Ball Colour");
 	ballColourGroup->setLayout(ballColourLayout);
 
+	initParameter(solver);
+	QGroupBox* paramGroup = new QGroupBox("Simulation Parameters");
+	paramGroup->setLayout(parameterLayout);
+
 	initSpawning(solver);
 	QGroupBox* spawningGroup = new QGroupBox("Spawners");
 	spawningGroup->setLayout(spawningLayout);
@@ -53,10 +57,14 @@ ControlPanel::ControlPanel(Solver* solver, Renderer* renderer)
 	bgBallLayout->addWidget(bgColourGroup);
 	bgBallLayout->addWidget(ballColourGroup);
 
+	paramSpawnLayout = new QHBoxLayout();
+	paramSpawnLayout->addWidget(paramGroup);
+	paramSpawnLayout->addWidget(spawningGroup);
+
 	globalLayout = new QVBoxLayout();
 	globalLayout->addLayout(taskbarLayout);
 	globalLayout->addLayout(bgBallLayout);
-	globalLayout->addWidget(spawningGroup);
+	globalLayout->addLayout(paramSpawnLayout);
 
 	centralWid->setLayout(globalLayout);
 }
@@ -92,63 +100,19 @@ void ControlPanel::restartDialogHandler()
 
 void ControlPanel::initBgColour(Renderer* renderer)
 {
-	// background red control
-	QLabel* bgRLabel = new QLabel("Red", this);
-	bgRLabel->setAlignment(Qt::AlignRight);
-	QSlider* bgRSlider = new QSlider(Qt::Orientation::Horizontal, this);
-	bgRSlider->setTickPosition(QSlider::NoTicks);
-	bgRSlider->setRange(0, 255);
-	bgRSlider->setSliderPosition(255);
-	bgRSlider->setMinimumWidth(100);
-	QSpinBox* bgRSpin = new QSpinBox(this);
-	bgRSpin->setRange(0, 255);
-	bgRSpin->setValue(255);
+	bgColourLayout = new QHBoxLayout(this);
 
-	// background green control
-	QLabel* bgGLabel = new QLabel("Green", this);
-	bgGLabel->setAlignment(Qt::AlignRight);
-	QSlider* bgGSlider = new QSlider(Qt::Orientation::Horizontal, this);
-	bgGSlider->setTickPosition(QSlider::NoTicks);
-	bgGSlider->setRange(0, 255);
-	bgGSlider->setSliderPosition(255);
-	QSpinBox* bgGSpin = new QSpinBox(this);
-	bgGSpin->setRange(0, 255);
-	bgGSpin->setValue(255);
+	RGBInput* bgRGB = new RGBInput(this);
 
-	// background blue control
-	QLabel* bgBLabel = new QLabel("Blue", this);
-	bgBLabel->setAlignment(Qt::AlignRight);
-	QSlider* bgBSlider = new QSlider(Qt::Orientation::Horizontal, this);
-	bgBSlider->setTickPosition(QSlider::NoTicks);
-	bgBSlider->setRange(0, 255);
-	bgBSlider->setSliderPosition(255);
-	QSpinBox* bgBSpin = new QSpinBox(this);
-	bgBSpin->setRange(0, 255);
-	bgBSpin->setValue(255);
+	QObject::connect(bgRGB, SIGNAL(rValueChanged(int)), renderer, SLOT(setBackgroundRed(int)));
+	QObject::connect(bgRGB, SIGNAL(gValueChanged(int)), renderer, SLOT(setBackgroundGreen(int)));
+	QObject::connect(bgRGB, SIGNAL(bValueChanged(int)), renderer, SLOT(setBackgroundBlue(int)));
 
-	// couple sliders and spinboxes, and connect spinbox to renderer
-	QObject::connect(bgRSlider, SIGNAL(valueChanged(int)), bgRSpin,   SLOT(setValue(int)));
-	QObject::connect(bgGSlider, SIGNAL(valueChanged(int)), bgGSpin,   SLOT(setValue(int)));
-	QObject::connect(bgBSlider, SIGNAL(valueChanged(int)), bgBSpin,   SLOT(setValue(int)));
-	QObject::connect(bgRSpin,   SIGNAL(valueChanged(int)), bgRSlider, SLOT(setValue(int)));
-	QObject::connect(bgGSpin,   SIGNAL(valueChanged(int)), bgGSlider, SLOT(setValue(int)));
-	QObject::connect(bgBSpin,   SIGNAL(valueChanged(int)), bgBSlider, SLOT(setValue(int)));
-	QObject::connect(bgRSpin,   SIGNAL(valueChanged(int)), renderer,  SLOT(setBackgroundRed(int)));
-	QObject::connect(bgGSpin,   SIGNAL(valueChanged(int)), renderer,  SLOT(setBackgroundGreen(int)));
-	QObject::connect(bgBSpin,   SIGNAL(valueChanged(int)), renderer,  SLOT(setBackgroundBlue(int)));
-
-	// add sliders to layout
-	bgColourLayout = new QGridLayout(this);
-	bgColourLayout->addWidget(bgRLabel, 0, 0); bgColourLayout->addWidget(bgRSlider, 0, 1); bgColourLayout->addWidget(bgRSpin, 0, 2);
-	bgColourLayout->addWidget(bgGLabel, 1, 0); bgColourLayout->addWidget(bgGSlider, 1, 1); bgColourLayout->addWidget(bgGSpin, 1, 2);
-	bgColourLayout->addWidget(bgBLabel, 2, 0); bgColourLayout->addWidget(bgBSlider, 2, 1); bgColourLayout->addWidget(bgBSpin, 2, 2);
+	bgColourLayout->addWidget(bgRGB);
 }
 
 void ControlPanel::initBallColour(Renderer* renderer)
 {
-	QWidget* sliderGroup		  = new QWidget(this);
-	QGridLayout* ballSliderLayout = new QGridLayout();
-	sliderGroup->setLayout(ballSliderLayout);
 	
 	// separate ball colour radio buttons
 	QButtonGroup* ballColourGroup = new QButtonGroup(this);
@@ -157,77 +121,34 @@ void ControlPanel::initBallColour(Renderer* renderer)
 	ballColourGroup->addButton(randomRadio, 0);
 	ballColourGroup->addButton(rgbRadio, 1);
 
-	// ball red control
-	QLabel* ballRLabel = new QLabel("Red", this);
-	ballRLabel->setAlignment(Qt::AlignRight);
-	QSlider* ballRSlider = new QSlider(Qt::Orientation::Horizontal, sliderGroup);
-	ballRSlider->setTickPosition(QSlider::NoTicks);
-	ballRSlider->setRange(0, 255);
-	ballRSlider->setSliderPosition(255);
-	ballRSlider->setMinimumWidth(100);
-	QSpinBox* ballRSpin = new QSpinBox(sliderGroup);
-	ballRSpin->setRange(0, 255);
-	ballRSpin->setValue(255);
-
-	// ball green control
-	QLabel* ballGLabel = new QLabel("Green", this);
-	ballGLabel->setAlignment(Qt::AlignRight);
-	QSlider* ballGSlider = new QSlider(Qt::Orientation::Horizontal, sliderGroup);
-	ballGSlider->setTickPosition(QSlider::NoTicks);
-	ballGSlider->setRange(0, 255);
-	ballGSlider->setSliderPosition(255);
-	QSpinBox* ballGSpin = new QSpinBox(sliderGroup);
-	ballGSpin->setRange(0, 255);
-	ballGSpin->setValue(255);
-
-	// ball blue control
-	QLabel* ballBLabel = new QLabel("Blue", this);
-	ballBLabel->setAlignment(Qt::AlignRight);
-	QSlider* ballBSlider = new QSlider(Qt::Orientation::Horizontal, sliderGroup);
-	ballBSlider->setTickPosition(QSlider::NoTicks);
-	ballBSlider->setRange(0, 255);
-	ballBSlider->setSliderPosition(255);
-	QSpinBox* ballBSpin = new QSpinBox(sliderGroup);
-	ballBSpin->setRange(0, 255);
-	ballBSpin->setValue(255);
-
-	// add sliders to layout
-	ballSliderLayout->addWidget(ballRLabel, 0, 0); ballSliderLayout->addWidget(ballRSlider, 0, 1); ballSliderLayout->addWidget(ballRSpin, 0, 2);
-	ballSliderLayout->addWidget(ballGLabel, 1, 0); ballSliderLayout->addWidget(ballGSlider, 1, 1); ballSliderLayout->addWidget(ballGSpin, 1, 2);
-	ballSliderLayout->addWidget(ballBLabel, 2, 0); ballSliderLayout->addWidget(ballBSlider, 2, 1); ballSliderLayout->addWidget(ballBSpin, 2, 2);
+	RGBInput* ballRGB = new RGBInput(this);
 
 	ballColourLayout = new QGridLayout(this);
 	ballColourLayout->addWidget(randomRadio, 0, 0);
 	ballColourLayout->addWidget(new QLabel("Random"), 0, 1);
 	ballColourLayout->addWidget(rgbRadio, 1, 0, Qt::AlignTop);
-	ballColourLayout->addWidget(sliderGroup, 1, 1);
+	ballColourLayout->addWidget(ballRGB, 1, 1);
 
 	// connect radio buttons to renderer
 	QObject::connect(randomRadio, SIGNAL(toggled(bool)), renderer, SLOT(toggleRandom(bool)));
-	QObject::connect(randomRadio, SIGNAL(toggled(bool)), sliderGroup, SLOT(setDisabled(bool)));
-	//QObject::connect(rgbRadio, SIGNAL(toggled(bool)), ballRSlider, SLOT(setEnabled(bool)));
+	QObject::connect(randomRadio, SIGNAL(toggled(bool)), ballRGB, SLOT(setDisabled(bool)));
+
 	// couple sliders and spinboxes, and connect spinboxes to renderer
-	QObject::connect(ballRSlider, SIGNAL(valueChanged(int)), ballRSpin,   SLOT(setValue(int)));
-	QObject::connect(ballGSlider, SIGNAL(valueChanged(int)), ballGSpin,   SLOT(setValue(int)));
-	QObject::connect(ballBSlider, SIGNAL(valueChanged(int)), ballBSpin,   SLOT(setValue(int)));
-	QObject::connect(ballRSpin,   SIGNAL(valueChanged(int)), ballRSlider, SLOT(setValue(int)));
-	QObject::connect(ballGSpin,   SIGNAL(valueChanged(int)), ballGSlider, SLOT(setValue(int)));
-	QObject::connect(ballBSpin,   SIGNAL(valueChanged(int)), ballBSlider, SLOT(setValue(int)));
-	QObject::connect(ballRSpin,   SIGNAL(valueChanged(int)), renderer,    SLOT(setBallRed(int)));
-	QObject::connect(ballGSpin,   SIGNAL(valueChanged(int)), renderer,    SLOT(setBallGreen(int)));
-	QObject::connect(ballBSpin,   SIGNAL(valueChanged(int)), renderer,    SLOT(setBallBlue(int)));
+	QObject::connect(ballRGB, SIGNAL(rValueChanged(int)), renderer, SLOT(setBallRed(int)));
+	QObject::connect(ballRGB, SIGNAL(gValueChanged(int)), renderer, SLOT(setBallGreen(int)));
+	QObject::connect(ballRGB, SIGNAL(bValueChanged(int)), renderer, SLOT(setBallBlue(int)));
 
 	// default values
-	ballRSpin->setValue(255);
-	ballGSpin->setValue(0);
-	ballBSpin->setValue(0);
+	ballRGB->setValues(255, 0, 0);
 	randomRadio->setChecked(true);
 }
 
 void ControlPanel::initParameter(Solver* solver)
 {
 	// framerate
-	/*fpsDropdown = new QComboBox(this);
+	QLabel* fps = new QLabel("Framerate", this);
+	fps->setAlignment(Qt::AlignRight);
+	fpsDropdown = new QComboBox(this);
 	fpsDropdown->addItem("12");
 	fpsDropdown->addItem("24");
 	fpsDropdown->addItem("30");
@@ -235,23 +156,103 @@ void ControlPanel::initParameter(Solver* solver)
 	fpsDropdown->addItem("60");
 	fpsDropdown->addItem("120");
 	fpsDropdown->addItem("144");
-	fpsDropdown->addItem("240");*/
+	fpsDropdown->addItem("240");
+	fpsDropdown->setDisabled(true);
 
 	// substeps
+	QLabel* substeps = new QLabel("Substeps", this);
+	substeps->setAlignment(Qt::AlignRight);
 	substepsInput = new QLineEdit(this);
 	substepsInput->setValidator(new QIntValidator(1, 16, this));
+	substepsInput->setPlaceholderText("1-16");
+	substepsInput->setText(QString::fromStdString(std::to_string(solver->getSubsteps())));
 
 	// max objects
+	QLabel* maxObjects = new QLabel("Max. Objects", this);
+	maxObjects->setAlignment(Qt::AlignRight);
 	maxObjectsInput = new QLineEdit(this);
-	maxObjectsInput->setValidator(new QIntValidator(0, 1'000'000, this));
+	maxObjectsInput->setValidator(new QIntValidator(0, 999'999, this));
+	maxObjectsInput->setPlaceholderText("ex. 1000");
+	maxObjectsInput->setText(QString::fromStdString(std::to_string(solver->getMaxObjects())));
 
 	// gravity
+	QLabel* g = new QLabel("Gravity", this);
+	g->setAlignment(Qt::AlignRight);
+	gInput = new VectorInput(VectorInput::Orientation::Horizontal, this);
+	Vec2D gravity = solver->getGravity();
+	gInput->setXText(QString::fromStdString(std::to_string(gravity.x())));
+	gInput->setYText(QString::fromStdString(std::to_string(-gravity.y())));
 
+	// status message
+	paramStatus = new QLabel("Parameters applied!", this);
+	paramStatus->setStyleSheet("font-style:italic");
+	paramStatus->setVisible(false);
 
+	// apply button
+	QHBoxLayout* paramApplyLayout = new QHBoxLayout(this);
+	paramApplyButton = new QPushButton("Apply", this);
+	paramApplyLayout->addStretch();
+	paramApplyLayout->addWidget(paramApplyButton);
 
+	QGridLayout* paramInputLayout = new QGridLayout(this);
+	paramInputLayout->addWidget(fps, 0, 0);
+	paramInputLayout->addWidget(substeps, 1, 0);
+	paramInputLayout->addWidget(maxObjects, 2, 0);
+	paramInputLayout->addWidget(g, 3, 0);
+	paramInputLayout->addWidget(fpsDropdown, 0, 1);
+	paramInputLayout->addWidget(substepsInput, 1, 1);
+	paramInputLayout->addWidget(maxObjectsInput, 2, 1);
+	paramInputLayout->addWidget(gInput, 3, 1);
+
+	parameterLayout = new QVBoxLayout(this);
+	parameterLayout->addLayout(paramInputLayout);
+	parameterLayout->addWidget(paramStatus);
+	parameterLayout->addStretch();
+	parameterLayout->addLayout(paramApplyLayout);
+
+	// button sends parameters to solver
+	QObject::connect(paramApplyButton, SIGNAL(clicked(bool)), this, SLOT(updateParamDisplay()));
+	QObject::connect(this, SIGNAL(applyFramerate(int)),    solver, SLOT(setFramerate(int)));
+	QObject::connect(this, SIGNAL(applySubsteps(int)),     solver, SLOT(setSubsteps(int)));
+	QObject::connect(this, SIGNAL(applyMaxObjects(int)),   solver, SLOT(setMaxObjects(int)));
+	QObject::connect(this, SIGNAL(applyGravity(float, float)), solver, SLOT(setGravity(float, float)));
+	// stylesheets for lineedits
+	QObject::connect(substepsInput, &QLineEdit::textChanged, this, [=]() { substepsInput->setStyleSheet(valid); paramStatus->setVisible(false); });
+	QObject::connect(maxObjectsInput, &QLineEdit::textChanged, this, [=]() { maxObjectsInput->setStyleSheet(valid); paramStatus->setVisible(false); });
+	QObject::connect(gInput, &VectorInput::textChanged, this, [=]() { gInput->setStyleSheet(valid); paramStatus->setVisible(false); });
 
 	// default values
-	//fpsDropdown->setCurrentIndex(4);	// 60 fps
+	fpsDropdown->setCurrentIndex(4);	// 60 fps
+	
+}
+
+void ControlPanel::updateParamDisplay()
+{
+	// at least one line edit is empty
+	if (substepsInput->text().length() == 0 ||
+		maxObjectsInput->text().length() == 0 ||
+		gInput->isIncomplete())
+	{
+		// highlight invalid lineedit
+		if (substepsInput->text().length() == 0) {
+			substepsInput->setStyleSheet(invalid);
+		}
+		if (maxObjectsInput->text().length() == 0) {
+			maxObjectsInput->setStyleSheet(invalid);
+		}
+		if (gInput->isIncomplete()) {
+			gInput->setStyleSheet(invalid);
+		}
+
+		return;
+	}
+
+	// send values to solver
+	emit applyFramerate(std::stoi(fpsDropdown->currentText().toStdString()));
+	emit applySubsteps(std::stoi(substepsInput->text().toStdString()));
+	emit applyMaxObjects(std::stoi(maxObjectsInput->text().toStdString()));
+	emit applyGravity(std::stof(gInput->x().toStdString()), std::stof(gInput->y().toStdString()) * -1.f);	// flip y because window origin is top left
+	paramStatus->setVisible(true);
 }
 
 void ControlPanel::initSpawning(Solver* solver)
@@ -270,48 +271,13 @@ void ControlPanel::initSpawning(Solver* solver)
 	QRegularExpressionValidator* idValidator = new QRegularExpressionValidator(idRe, this);
 	idInput->setValidator(idValidator);
 
-	QDoubleValidator* doubleValidator = new QDoubleValidator(this);
+	// position and velocity input
+	posInput = new VectorInput(VectorInput::Orientation::Horizontal, this);
+	velInput = new VectorInput(VectorInput::Orientation::Horizontal, this);
 
-	// spawner position input
-	QWidget* posInput = new QWidget(this);
-	QHBoxLayout* posInputLayout = new QHBoxLayout(posInput);
-	posInput->setLayout(posInputLayout);
-	posXInput = new QLineEdit(posInput);
-	posYInput = new QLineEdit(posInput);
-	posXInput->setPlaceholderText("200.0");
-	posYInput->setPlaceholderText("400.0");
-	posXInput->setValidator(doubleValidator);
-	posYInput->setValidator(doubleValidator);
-
-	posInputLayout->addStretch();
-	posInputLayout->addWidget(new QLabel("X"));
-	posInputLayout->addWidget(posXInput);
-	posInputLayout->addStretch();
-	posInputLayout->addWidget(new QLabel("Y"));
-	posInputLayout->addWidget(posYInput);
-	posInputLayout->setContentsMargins(0, 0, 0, 0);
-
-	// spawner velocity input
-	QWidget* velInput = new QWidget(this);
-	QHBoxLayout* velInputLayout = new QHBoxLayout(velInput);
-	velInput->setLayout(velInputLayout);
-	velXInput = new QLineEdit(velInput);
-	velYInput = new QLineEdit(velInput);
-	velXInput->setPlaceholderText("1000.0");
-	velYInput->setPlaceholderText("-500.0");
-	velXInput->setValidator(doubleValidator);
-	velYInput->setValidator(doubleValidator);
-
-	velInputLayout->addStretch();
-	velInputLayout->addWidget(new QLabel("X"));
-	velInputLayout->addWidget(velXInput);
-	velInputLayout->addStretch();
-	velInputLayout->addWidget(new QLabel("Y"));
-	velInputLayout->addWidget(velYInput);
-	velInputLayout->setContentsMargins(0, 0, 0, 0);
-
-	QPushButton* addButton = new QPushButton("Add", this);
-	QPushButton* clearButton = new QPushButton("Clear", this);
+	// buttons
+	addButton = new QPushButton("Add", this);
+	clearButton = new QPushButton("Clear", this);
 	QHBoxLayout* spawnerFormButtonLayout = new QHBoxLayout(this);
 	spawnerFormButtonLayout->addStretch();
 	spawnerFormButtonLayout->addWidget(clearButton);
@@ -322,14 +288,12 @@ void ControlPanel::initSpawning(Solver* solver)
 	spawnerFormLayout->addWidget(new QLabel("ID:"),		  0, 0, Qt::AlignRight);
 	spawnerFormLayout->addWidget(new QLabel("Position:"), 1, 0, Qt::AlignRight);
 	spawnerFormLayout->addWidget(new QLabel("Velocity:"), 2, 0, Qt::AlignRight);
-	spawnerFormLayout->addWidget(idInput,  0, 1);
+	spawnerFormLayout->addWidget(idInput, 0, 1);
 	spawnerFormLayout->addWidget(posInput, 1, 1);
 	spawnerFormLayout->addWidget(velInput, 2, 1);
 	spawnerFormLayout->addLayout(spawnerFormButtonLayout, 3, 1);
 	QGroupBox* spawnerFormGroup = new QGroupBox("Create Spawner");
 	spawnerFormGroup->setLayout(spawnerFormLayout);
-
-	
 
 	spawnerList = new QListWidget(this);
 

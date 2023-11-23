@@ -12,8 +12,10 @@
 
 int Circle::MAX_RADIUS = 20;
 int Circle::MIN_RADIUS = 10;
-const int WINDOW_W = sf::VideoMode::getDesktopMode().width / 2;
-const int WINDOW_H = sf::VideoMode::getDesktopMode().height * 0.8;
+//const int WINDOW_W = sf::VideoMode::getDesktopMode().width / 2;
+//const int WINDOW_H = sf::VideoMode::getDesktopMode().height * 0.8;
+const int WINDOW_W = 700;
+const int WINDOW_H = 700;
 
 
 void solverThread(Solver& solver, Renderer& renderer) 
@@ -26,11 +28,7 @@ void solverThread(Solver& solver, Renderer& renderer)
     sf::Clock infoUpdate;
 
     // configure solver parameters
-    solver.setGravity(Vec2D(0.f, 3000.f));
     solver.setBounds(RectBounds(0, WINDOW_W, 0, WINDOW_H));
-    solver.setFramerate(60);
-    solver.setSubsteps(4);
-    solver.setMaxObjects(100);
     solver.setSpawnInterval(0.1f);
 
     solver.addSpawner(Spawner("spawner", Vec2D(200, 200), Vec2D(1000, -1000), 0.2, true, true));
