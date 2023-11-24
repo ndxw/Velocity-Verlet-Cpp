@@ -35,6 +35,7 @@ void solverThread(Solver& solver, Renderer& renderer)
     // configure window parameters
     sf::RenderWindow window(sf::VideoMode(WINDOW_W, WINDOW_H), "Simulation Window");
     window.setFramerateLimit(solver.getFramerate());
+    window.setVisible(false);
     //window.setPosition(sf::Vector2i(0, 0));
 
     // start render loop

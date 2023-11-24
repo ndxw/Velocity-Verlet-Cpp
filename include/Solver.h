@@ -62,6 +62,7 @@ public slots:
     void setSubsteps(int);
     void setMaxObjects(int);
     void setGravity(float, float);
+    void addSpawner(std::string, float, float, float, float, float, bool, bool);
 
 };
 

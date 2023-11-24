@@ -13,6 +13,7 @@
 #include <QtWidgets/qmessagebox.h>
 #include <QtWidgets/qlistwidget.h>
 #include <QtWidgets/qcombobox.h>
+#include <QtWidgets/qcheckbox.h>
 
 class ControlPanel : public QMainWindow
 {
@@ -22,6 +23,35 @@ private:
 	QString separationLineStyle = QString("background-color: #c0c0c0;");
 	QString invalid = QString("background-color: #ffb0b0");
 	QString valid = QString("background-color: white");
+	QString main = QString(
+		"QGroupBox { \
+			border-radius: 5px; \
+			border: 1px solid #d8d8d8; \
+			margin: 8px 0px; \
+			padding: 8px; \
+		} \
+		QGroupBox::title { \
+			subcontrol-origin: margin; \
+			subcontrol-position: top left; \
+			left: 10px;	\
+		}");
+	QString danger = QString(
+		"QPushButton { \
+			border: 1px solid #d8d8d8; \
+			background-color: white; \
+			border-radius: 4px; \
+			padding: 2px 20px; \
+			color: #b00000; \
+			font-weight: bold; \
+		} \
+		QPushButton:hover { \
+			border: 1px solid #770000; \
+			border-radius: 4px; \
+			background-color: #b00000; \
+			padding: 2px 20px; \
+			color: white; \
+			font-weight: bold; \
+		}");
 
 	QVBoxLayout* globalLayout;
 	QHBoxLayout* bgBallLayout;
@@ -37,6 +67,9 @@ private:
 	QPushButton* pauseButton;
 	QPushButton* restartButton;
 	QMessageBox* restartDialog;
+	// restart dialog buttons
+	QPushButton* yes;
+	QPushButton* no;
 
 	// parameter inputs
 	QComboBox* fpsDropdown;
@@ -49,8 +82,12 @@ private:
 	QPushButton* paramApplyButton;
 
 	// spawner form inputs
+	QLineEdit* idInput;
 	VectorInput* posInput;
 	VectorInput* velInput;
+	QLineEdit* intervalInput;
+	QCheckBox* active;
+	QCheckBox* visible;
 	QPushButton* addButton;
 	QPushButton* clearButton;
 
@@ -60,7 +97,8 @@ private:
 private slots:
 	void togglePauseButton();
 	void restartDialogHandler();
-	void updateParamDisplay();
+	void updateParam();
+	void addSpawner();
 
 public:
 	ControlPanel(Solver* solver = 0, Renderer* renderer = 0);
@@ -77,6 +115,7 @@ signals:
 	void applySubsteps(int);
 	void applyMaxObjects(int);
 	void applyGravity(float, float);
+	void addSpawner(std::string, float, float, float, float, float, bool, bool);
 };
 
 #endif

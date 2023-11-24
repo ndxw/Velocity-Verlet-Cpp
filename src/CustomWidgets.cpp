@@ -54,40 +54,47 @@ RGBInput::RGBInput(QWidget* parent) : QWidget(parent)
 {
 	rgbLayout = new QGridLayout(this);
 	this->setLayout(rgbLayout);
+	this->setFixedHeight(90);
 
 	// background red control
-	QLabel* rLabel = new QLabel("Red", this);
-	rLabel->setAlignment(Qt::AlignRight);
 	rSlider = new QSlider(Qt::Orientation::Horizontal, this);
 	rSlider->setTickPosition(QSlider::NoTicks);
 	rSlider->setRange(0, 255);
 	rSlider->setSliderPosition(255);
 	rSlider->setMinimumWidth(100);
+	rSlider->setObjectName("rSlider");
 	rSpinBox = new QSpinBox(this);
 	rSpinBox->setRange(0, 255);
 	rSpinBox->setValue(255);
+	
+	rSlider->setStyleSheet(slider);
+	rSpinBox->setStyleSheet(spinbox);
 
 	// background green control
-	QLabel* gLabel = new QLabel("Green", this);
-	gLabel->setAlignment(Qt::AlignRight);
 	gSlider = new QSlider(Qt::Orientation::Horizontal, this);
 	gSlider->setTickPosition(QSlider::NoTicks);
 	gSlider->setRange(0, 255);
 	gSlider->setSliderPosition(255);
+	gSlider->setObjectName("gSlider");
 	gSpinBox = new QSpinBox(this);
 	gSpinBox->setRange(0, 255);
 	gSpinBox->setValue(255);
 
+	gSlider->setStyleSheet(slider);
+	gSpinBox->setStyleSheet(spinbox);
+
 	// background blue control
-	QLabel* bLabel = new QLabel("Blue", this);
-	bLabel->setAlignment(Qt::AlignRight);
 	bSlider = new QSlider(Qt::Orientation::Horizontal, this);
 	bSlider->setTickPosition(QSlider::NoTicks);
 	bSlider->setRange(0, 255);
 	bSlider->setSliderPosition(255);
+	bSlider->setObjectName("bSlider");
 	bSpinBox = new QSpinBox(this);
 	bSpinBox->setRange(0, 255);
 	bSpinBox->setValue(255);
+
+	bSlider->setStyleSheet(slider);
+	bSpinBox->setStyleSheet(spinbox);
 
 	// couple sliders and spinboxes, and expose spinbox signals
 	QObject::connect(rSlider,  SIGNAL(valueChanged(int)), rSpinBox, SLOT(setValue(int)));
@@ -101,9 +108,10 @@ RGBInput::RGBInput(QWidget* parent) : QWidget(parent)
 	QObject::connect(bSpinBox, SIGNAL(valueChanged(int)), this,   SIGNAL(bValueChanged(int)));
 
 	// add sliders to layout
-	rgbLayout->addWidget(rLabel, 0, 0); rgbLayout->addWidget(rSlider, 0, 1); rgbLayout->addWidget(rSpinBox, 0, 2);
-	rgbLayout->addWidget(gLabel, 1, 0); rgbLayout->addWidget(gSlider, 1, 1); rgbLayout->addWidget(gSpinBox, 1, 2);
-	rgbLayout->addWidget(bLabel, 2, 0); rgbLayout->addWidget(bSlider, 2, 1); rgbLayout->addWidget(bSpinBox, 2, 2);
+	rgbLayout->addWidget(rSlider, 0, 0); rgbLayout->addWidget(rSpinBox, 0, 1);
+	rgbLayout->addWidget(gSlider, 1, 0); rgbLayout->addWidget(gSpinBox, 1, 1);
+	rgbLayout->addWidget(bSlider, 2, 0); rgbLayout->addWidget(bSpinBox, 2, 1);
+	rgbLayout->setContentsMargins(0, 0, 0, 0);
 }
 
 void RGBInput::setValues(int r, int g, int b)

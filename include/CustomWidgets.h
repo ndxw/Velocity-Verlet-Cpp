@@ -48,6 +48,72 @@ class RGBInput : public QWidget
 	Q_OBJECT
 
 private:
+	QString slider = QString(
+		"QSlider::groove{\
+			border: 1px solid white;\
+			height: 3px;\
+			margin: 0px 7px;}\
+		QSlider::handle{\
+			background-color: white;\
+			width: 8px;\
+			height: 8px;\
+			margin: -5px;\
+			border-radius: 6px;}\
+		QSlider::add-page{\
+			background-color: white;\
+			border-radius: 2px;}\
+		QSlider::sub-page{\
+			border-radius: 2px;}\
+		\
+		QSlider#rSlider::handle{\
+			border: 4px solid #ff0000;}\
+		QSlider#rSlider::sub-page{\
+			background-color: #ff0000;}\
+		QSlider#gSlider::handle{\
+			border: 4px solid #00ff00;}\
+		QSlider#gSlider::sub-page{\
+			background-color: #00ff00;}\
+		QSlider#bSlider::handle{\
+			border: 4px solid #0000ff;}\
+		QSlider#bSlider::sub-page{\
+			background-color: #0000ff;}\
+		\
+		QSlider#rSlider::handle{ \
+			border: 4px solid #ff0000; }\
+		QSlider#rSlider::sub-page{ \
+			background-color: #ff0000; }\
+		QSlider#gSlider::handle{ \
+			border: 4px solid #00ff00; }\
+		QSlider#gSlider::sub-page{ \
+			background-color: #00ff00; }\
+		QSlider#bSlider::handle{ \
+			border: 4px solid #0000ff; }\
+		QSlider#bSlider::sub-page{ \
+			background-color: #0000ff; }");
+	// gray out slider when disabled ^
+
+	QString spinbox = QString(
+		"QSpinBox{\
+			width: 30px;\
+			border: 1px inset gray;\
+			border-radius: 2px;\
+			padding-right: -15px;\
+			margin-right: 20px;}\
+		QSpinBox::up-button{\
+			subcontrol-origin: margin;\
+			subcontrol-position: top right;\
+			width: 15px;\
+			border: 1px outset gray;\
+			border-top-left-radius: 7px;\
+			border-top-right-radius: 7px;}\
+		QSpinBox::down-button{\
+			subcontrol-origin: margin;\
+			subcontrol-position: bottom right;\
+			width: 15px;\
+			border: 1px outset gray;\
+			border-bottom-left-radius: 7px;\
+			border-bottom-right-radius: 7px;}");
+
 	QGridLayout* rgbLayout;
 	QSlider* rSlider;
 	QSlider* gSlider;

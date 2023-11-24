@@ -20,11 +20,12 @@ ControlPanel::ControlPanel(Solver* solver, Renderer* renderer)
 {
 
 	// window parameters===============================================
-	setWindowTitle("Control Panel");
-	resize(500, 500);
+	this->setWindowTitle("Control Panel");
+	this->resize(500, 700);
+	this->setStyleSheet(main);
 
 	QWidget* centralWid = new QWidget(this);
-	setCentralWidget(centralWid);
+	this->setCentralWidget(centralWid);
 	
 	// init sections===================================================
 	initTaskbar(solver);
@@ -48,9 +49,12 @@ ControlPanel::ControlPanel(Solver* solver, Renderer* renderer)
 	// init dialogs====================================================
 	restartDialog = new QMessageBox(this);
 	restartDialog->setText("Are you sure you want to restart the simulation?");
-	restartDialog->setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+	yes = restartDialog->addButton("Yes", QMessageBox::ButtonRole::AcceptRole);
+	yes->setStyleSheet(danger);
+	no = restartDialog->addButton("No", QMessageBox::ButtonRole::RejectRole);
 	restartDialog->setDefaultButton(QMessageBox::No);
 	restartDialog->setIcon(QMessageBox::Icon::Warning);
+	restartDialog->setWindowTitle("Restart Simulation");
 	
 	// add to global layout============================================
 	bgBallLayout = new QHBoxLayout();
@@ -73,10 +77,12 @@ void ControlPanel::initTaskbar(Solver* solver)
 {
 	pauseButton	  = new QPushButton("Pause",   this);
 	restartButton = new QPushButton("Restart", this);
+	restartButton->setStyleSheet(danger);
 
 	// add buttons to taskbar layout
 	taskbarLayout = new QHBoxLayout(this);
 	taskbarLayout->addWidget(pauseButton);
+	taskbarLayout->addStretch();
 	taskbarLayout->addWidget(restartButton);
 
 	// connect signals to solver
@@ -95,7 +101,7 @@ void ControlPanel::togglePauseButton()
 void ControlPanel::restartDialogHandler()
 {
 	int result = restartDialog->exec();
-	if (result == QMessageBox::Yes) emit restartConfirmed();
+	if (restartDialog->clickedButton() == yes) emit restartConfirmed();
 }
 
 void ControlPanel::initBgColour(Renderer* renderer)
@@ -211,7 +217,7 @@ void ControlPanel::initParameter(Solver* solver)
 	parameterLayout->addLayout(paramApplyLayout);
 
 	// button sends parameters to solver
-	QObject::connect(paramApplyButton, SIGNAL(clicked(bool)), this, SLOT(updateParamDisplay()));
+	QObject::connect(paramApplyButton, SIGNAL(clicked(bool)), this, SLOT(updateParam()));
 	QObject::connect(this, SIGNAL(applyFramerate(int)),    solver, SLOT(setFramerate(int)));
 	QObject::connect(this, SIGNAL(applySubsteps(int)),     solver, SLOT(setSubsteps(int)));
 	QObject::connect(this, SIGNAL(applyMaxObjects(int)),   solver, SLOT(setMaxObjects(int)));
@@ -226,7 +232,7 @@ void ControlPanel::initParameter(Solver* solver)
 	
 }
 
-void ControlPanel::updateParamDisplay()
+void ControlPanel::updateParam()
 {
 	// at least one line edit is empty
 	if (substepsInput->text().length() == 0 ||
@@ -251,7 +257,7 @@ void ControlPanel::updateParamDisplay()
 	emit applyFramerate(std::stoi(fpsDropdown->currentText().toStdString()));
 	emit applySubsteps(std::stoi(substepsInput->text().toStdString()));
 	emit applyMaxObjects(std::stoi(maxObjectsInput->text().toStdString()));
-	emit applyGravity(std::stof(gInput->x().toStdString()), std::stof(gInput->y().toStdString()) * -1.f);	// flip y because window origin is top left
+	emit applyGravity(std::stof(gInput->x().toStdString()), std::stof(gInput->y().toStdString()));
 	paramStatus->setVisible(true);
 }
 
@@ -265,7 +271,7 @@ void ControlPanel::initSpawning(Solver* solver)
 	spawningOptionsGroup->addButton(freeRadio, 1);
 
 	// spawner creation form
-	QLineEdit* idInput = new QLineEdit(this);
+	idInput = new QLineEdit(this);
 	idInput->setPlaceholderText("ex. spawner1");
 	QRegularExpression idRe("^[a-zA-Z0-9_-]+$");
 	QRegularExpressionValidator* idValidator = new QRegularExpressionValidator(idRe, this);
@@ -274,6 +280,17 @@ void ControlPanel::initSpawning(Solver* solver)
 	// position and velocity input
 	posInput = new VectorInput(VectorInput::Orientation::Horizontal, this);
 	velInput = new VectorInput(VectorInput::Orientation::Horizontal, this);
+
+	// interval input
+	intervalInput = new QLineEdit(this);
+	intervalInput->setPlaceholderText("ex. 0.5");
+	QRegularExpression intervalRe("^((0+(\.(0*[1-9]+\d*)))|([1-9]+\d*(\.\d+)?)|(\.(0*[1-9]+\d*)))$");	// match all positive non-zero doubles
+	QRegularExpressionValidator* intervalValidator = new QRegularExpressionValidator(intervalRe, this);
+	intervalInput->setValidator(intervalValidator);
+
+	// active/visibility
+	active = new QCheckBox(this);
+	visible = new QCheckBox(this);
 
 	// buttons
 	addButton = new QPushButton("Add", this);
@@ -288,10 +305,19 @@ void ControlPanel::initSpawning(Solver* solver)
 	spawnerFormLayout->addWidget(new QLabel("ID:"),		  0, 0, Qt::AlignRight);
 	spawnerFormLayout->addWidget(new QLabel("Position:"), 1, 0, Qt::AlignRight);
 	spawnerFormLayout->addWidget(new QLabel("Velocity:"), 2, 0, Qt::AlignRight);
+	spawnerFormLayout->addWidget(new QLabel("Interval:"), 3, 0, Qt::AlignRight);
+	spawnerFormLayout->addWidget(new QLabel("Active:"),   4, 0, Qt::AlignRight);
+	spawnerFormLayout->addWidget(new QLabel("Visible:"),  5, 0, Qt::AlignRight);
 	spawnerFormLayout->addWidget(idInput, 0, 1);
 	spawnerFormLayout->addWidget(posInput, 1, 1);
 	spawnerFormLayout->addWidget(velInput, 2, 1);
-	spawnerFormLayout->addLayout(spawnerFormButtonLayout, 3, 1);
+	spawnerFormLayout->addWidget(intervalInput, 3, 1);
+	spawnerFormLayout->addWidget(active, 4, 1);
+	spawnerFormLayout->addWidget(visible, 5, 1);
+	spawnerFormLayout->addWidget(new QLabel("px/s"), 1, 2, Qt::AlignLeft);
+	spawnerFormLayout->addWidget(new QLabel("px/s"), 2, 2, Qt::AlignLeft);
+	spawnerFormLayout->addWidget(new QLabel("s"), 3, 2, Qt::AlignLeft);
+	spawnerFormLayout->addLayout(spawnerFormButtonLayout, 6, 1);
 	QGroupBox* spawnerFormGroup = new QGroupBox("Create Spawner");
 	spawnerFormGroup->setLayout(spawnerFormLayout);
 
@@ -314,7 +340,57 @@ void ControlPanel::initSpawning(Solver* solver)
 
 	// connect spawner radio buttons to solver
 	QObject::connect(autoRadio, SIGNAL(toggled(bool)), solver, SLOT(setAutoSpawning(bool)));
+	// clear form fields
+	QObject::connect(clearButton, SIGNAL(clicked(bool)), idInput,  SLOT(clear()));
+	QObject::connect(clearButton, SIGNAL(clicked(bool)), posInput, SLOT(clear()));
+	QObject::connect(clearButton, SIGNAL(clicked(bool)), velInput, SLOT(clear()));
+	QObject::connect(clearButton, SIGNAL(clicked(bool)), intervalInput, SLOT(clear()));
+	// send spawner parameters to solver
+	QObject::connect(addButton, SIGNAL(clicked(bool)), this, SLOT(addSpawner()));
+	QObject::connect(this, SIGNAL(addSpawner(std::string, float, float, float, float, float, bool, bool)),
+					 solver, SLOT(addSpawner(std::string, float, float, float, float, float, bool, bool)));
+	// remove invalid style when field changes
+	QObject::connect(idInput,		&QLineEdit::textChanged,   this, [=]() { idInput->setStyleSheet(valid); });
+	QObject::connect(posInput,		&VectorInput::textChanged, this, [=]() { posInput->setStyleSheet(valid); });
+	QObject::connect(velInput,		&VectorInput::textChanged, this, [=]() { velInput->setStyleSheet(valid); });
+	QObject::connect(intervalInput, &QLineEdit::textChanged,   this, [=]() { intervalInput->setStyleSheet(valid); });
 
 	// default values
 	autoRadio->setChecked(true);
+	active->setChecked(true);
+	visible->setChecked(true);
+}
+
+void ControlPanel::addSpawner()
+{
+	// at least one field is empty
+	if (idInput->text().length() == 0 ||
+		posInput->isIncomplete() ||
+		velInput->isIncomplete() || 
+		intervalInput->text().length() == 0)
+	{
+		if (idInput->text().length() == 0) {
+			idInput->setStyleSheet(invalid);
+		}
+		if (posInput->isIncomplete()) {
+			posInput->setStyleSheet(invalid);
+		}
+		if (velInput->isIncomplete()) {
+			velInput->setStyleSheet(invalid);
+		}
+		if (intervalInput->text().length() == 0) {
+			intervalInput->setStyleSheet(invalid);
+		}
+		return;
+	}
+
+	emit addSpawner(idInput->text().toStdString(),
+					std::stof(posInput->x().toStdString()), std::stof(posInput->y().toStdString()),
+					std::stof(velInput->x().toStdString()), std::stof(velInput->y().toStdString()),
+					std::stof(intervalInput->text().toStdString()),
+					active->isChecked(), visible->isChecked());
+	idInput->clear();
+	posInput->clear();
+	velInput->clear();
+	intervalInput->clear();
 }

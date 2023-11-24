@@ -226,17 +226,8 @@ void Solver::updateSolver(float dt)
 void Solver::restart() { objects.clear(); }
 void Solver::togglePause() { paused = !paused; }
 void Solver::setAutoSpawning(bool value) { autoSpawning = value; }
-
-void Solver::setFramerate(int framerate) 
-{ 
-    FRAMERATE = framerate;
-}
-
-void Solver::setSubsteps(int substeps) {
-    substeps = std::max(1, substeps);
-    substeps = std::min(16, substeps);
-    SUBSTEPS = substeps;
-}
+void Solver::setFramerate(int framerate) { FRAMERATE = framerate; }
+void Solver::setSubsteps(int substeps) { SUBSTEPS = substeps; }
 
 void Solver::setMaxObjects(int maxObjects)
 {
@@ -244,7 +235,8 @@ void Solver::setMaxObjects(int maxObjects)
     objects.reserve(MAX_OBJECTS);
 }
 
-void Solver::setGravity(float x, float y)
-{
-    GRAVITY = Vec2D(x, y);
+void Solver::setGravity(float x, float y) { GRAVITY = Vec2D(x, y); }
+
+void Solver::addSpawner(std::string id, float posX, float posY, float velX, float velY, float interval, bool active, bool visible) {
+    spawners.push_back(Spawner(id, Vec2D(posX, posY), Vec2D(velX, velY), interval, active, visible));
 }
