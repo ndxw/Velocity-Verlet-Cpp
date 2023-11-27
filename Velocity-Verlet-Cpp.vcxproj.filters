@@ -35,6 +35,9 @@
     <ClInclude Include="include\Vec2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\DTO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\sprites\auto-spawn-off-button.png">

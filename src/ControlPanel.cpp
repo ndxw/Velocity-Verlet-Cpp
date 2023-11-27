@@ -1,6 +1,7 @@
 #include "../include/ControlPanel.h"
 
 #include <string>
+#include <iostream>
 
 #include <QtWidgets/qslider.h>
 #include <QtWidgets/qlabel.h>
@@ -18,6 +19,7 @@
 
 ControlPanel::ControlPanel(Solver* solver, Renderer* renderer) 
 {
+	this->solver = solver;
 
 	// window parameters===============================================
 	this->setWindowTitle("Control Panel");
@@ -301,6 +303,9 @@ void ControlPanel::initSpawning(Solver* solver)
 	spawnerFormButtonLayout->addWidget(addButton);
 	spawnerFormButtonLayout->setContentsMargins(0, 0, 0, 0);
 
+	// TEMP: edit button to test dialog
+	editButton = new QPushButton("Edit", this);
+
 	QGridLayout* spawnerFormLayout = new QGridLayout(this);
 	spawnerFormLayout->addWidget(new QLabel("ID:"),		  0, 0, Qt::AlignRight);
 	spawnerFormLayout->addWidget(new QLabel("Position:"), 1, 0, Qt::AlignRight);
@@ -336,7 +341,9 @@ void ControlPanel::initSpawning(Solver* solver)
 
 	spawningLayout = new QVBoxLayout(this);
 	spawningLayout->addLayout(spawnerOptionsFormLayout);
+	spawningLayout->addWidget(editButton);
 	spawningLayout->addWidget(spawnerList);
+
 
 	// connect spawner radio buttons to solver
 	QObject::connect(autoRadio, SIGNAL(toggled(bool)), solver, SLOT(setAutoSpawning(bool)));
@@ -347,18 +354,34 @@ void ControlPanel::initSpawning(Solver* solver)
 	QObject::connect(clearButton, SIGNAL(clicked(bool)), intervalInput, SLOT(clear()));
 	// send spawner parameters to solver
 	QObject::connect(addButton, SIGNAL(clicked(bool)), this, SLOT(addSpawner()));
-	QObject::connect(this, SIGNAL(addSpawner(std::string, float, float, float, float, float, bool, bool)),
-					 solver, SLOT(addSpawner(std::string, float, float, float, float, float, bool, bool)));
+	QObject::connect(this, SIGNAL(addSpawner(SpawnerDTO)), solver, SLOT(addSpawner(SpawnerDTO)));
 	// remove invalid style when field changes
 	QObject::connect(idInput,		&QLineEdit::textChanged,   this, [=]() { idInput->setStyleSheet(valid); });
 	QObject::connect(posInput,		&VectorInput::textChanged, this, [=]() { posInput->setStyleSheet(valid); });
 	QObject::connect(velInput,		&VectorInput::textChanged, this, [=]() { velInput->setStyleSheet(valid); });
 	QObject::connect(intervalInput, &QLineEdit::textChanged,   this, [=]() { intervalInput->setStyleSheet(valid); });
+	// populate spawner list
+	QObject::connect(this, SIGNAL(getSpawnerIDs()), solver, SLOT(retrieveSpawnerIDs()));
+	QObject::connect(solver, SIGNAL(returnSpawnerIDs(std::vector<std::string>)), this, SLOT(receiveSpawnerIDs(std::vector<std::string>)));
+	// spawner edit sigs
+	QObject::connect(editButton, &QPushButton::clicked, this, [=]() { emit getSpawner("spawner"); });
+	QObject::connect(this, SIGNAL(getSpawner(std::string)), solver, SLOT(retrieveSpawner(std::string)));
+	QObject::connect(solver, SIGNAL(returnSpawner(Spawner*)), this, SLOT(receiveSpawner(Spawner*)));
 
 	// default values
 	autoRadio->setChecked(true);
 	active->setChecked(true);
 	visible->setChecked(true);
+}
+
+void ControlPanel::receiveSpawner(Spawner* spawner)
+{
+	if (spawner == nullptr) { std::cout << "spawner DNE" << std::endl; return; }
+
+	SpawnerEdit* spawnerEditDialog = new SpawnerEdit(spawner, this);
+	QObject::connect(spawnerEditDialog, SIGNAL(applySpawnerEdits(std::string, SpawnerDTO)), solver, SLOT(updateSpawner(std::string, SpawnerDTO)));
+
+	int result = spawnerEditDialog->exec();
 }
 
 void ControlPanel::addSpawner()
@@ -384,13 +407,28 @@ void ControlPanel::addSpawner()
 		return;
 	}
 
-	emit addSpawner(idInput->text().toStdString(),
-					std::stof(posInput->x().toStdString()), std::stof(posInput->y().toStdString()),
-					std::stof(velInput->x().toStdString()), std::stof(velInput->y().toStdString()),
-					std::stof(intervalInput->text().toStdString()),
-					active->isChecked(), visible->isChecked());
+	SpawnerDTO dto;
+	dto.id = idInput->text().toStdString();
+	dto.posX = posInput->x().toFloat();
+	dto.posY = posInput->y().toFloat();
+	dto.velX = velInput->x().toFloat();
+	dto.velY = velInput->y().toFloat();
+	dto.interval = intervalInput->text().toFloat();
+	dto.active = active->isChecked();
+	dto.visible = visible->isChecked();
+
+	emit addSpawner(dto);
+
 	idInput->clear();
 	posInput->clear();
 	velInput->clear();
 	intervalInput->clear();
+}
+
+void ControlPanel::receiveSpawnerIDs(std::vector<std::string> spawnerIDs)
+{
+	for (int i = 0; i < spawnerIDs.size(); i++) {
+		SpawnerListEntry* entry = new SpawnerListEntry(spawnerIDs.at(i), spawnerList);
+		
+	}
 }

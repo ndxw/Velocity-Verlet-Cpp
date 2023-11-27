@@ -3,6 +3,8 @@
 
 #include "Objects.h"
 #include "Grid.h"
+#include "DTO.h"
+
 #include <QtCore/qobject.h>
 #include <QtWidgets/qabstractbutton.h>
 
@@ -52,18 +54,24 @@ public:
     void addSpawner(const Spawner&);
     void updateSolver(float);
 
-    
+signals:
+    void returnSpawner(Spawner*);
+    void returnSpawnerIDs(std::vector<std::string>);
 
 public slots:
     void restart();
     void togglePause();
+
     void setAutoSpawning(bool);
     void setFramerate(int);
     void setSubsteps(int);
     void setMaxObjects(int);
     void setGravity(float, float);
-    void addSpawner(std::string, float, float, float, float, float, bool, bool);
 
+    void addSpawner(SpawnerDTO);
+    void retrieveSpawner(std::string);
+    void updateSpawner(std::string, SpawnerDTO);
+    void retrieveSpawnerIDs();
 };
 
 #endif

@@ -212,7 +212,7 @@ void Solver::updateSolver(float dt)
     for (Spawner& spawner : spawners) {
         if (objects.size() >= MAX_OBJECTS) break;
 
-        if (spawner.timer.getElapsedTime().asSeconds() >= spawner.interval) {
+        if (spawner.active && spawner.timer.getElapsedTime().asSeconds() >= spawner.interval) {
             Circle circle = Circle();
             Circle::generateRandomObject(circle);
             circle.pos = spawner.pos;
@@ -235,8 +235,53 @@ void Solver::setMaxObjects(int maxObjects)
     objects.reserve(MAX_OBJECTS);
 }
 
-void Solver::setGravity(float x, float y) { GRAVITY = Vec2D(x, y); }
+void Solver::setGravity(float x, float y) 
+{ 
+    GRAVITY.setX(x); 
+    GRAVITY.setY(y); 
+}
 
-void Solver::addSpawner(std::string id, float posX, float posY, float velX, float velY, float interval, bool active, bool visible) {
-    spawners.push_back(Spawner(id, Vec2D(posX, posY), Vec2D(velX, velY), interval, active, visible));
+void Solver::addSpawner(SpawnerDTO dto)
+{
+    spawners.push_back(Spawner( dto.id, 
+                                Vec2D(dto.posX, dto.posY), 
+                                Vec2D(dto.velX, dto.velY), 
+                                dto.interval, dto.active, dto.visible));
+}
+
+void Solver::retrieveSpawner(std::string id)
+{
+    for (Spawner spawner : spawners) {
+        if (spawner.id == id) {
+            emit returnSpawner(&spawner);
+            return;
+        }
+    }
+    emit returnSpawner(nullptr);
+}
+
+void Solver::updateSpawner(std::string id, SpawnerDTO dto)
+{
+    for (Spawner& spawner : spawners) {
+        if (spawner.id == id) {
+            spawner.id = dto.id;
+            spawner.pos.setX(dto.posX);
+            spawner.pos.setY(dto.posY);
+            spawner.vel.setX(dto.velX);
+            spawner.vel.setY(dto.velY);
+            spawner.interval = dto.interval;
+            spawner.active = dto.active;
+            spawner.visible = dto.visible;
+            return;
+        }
+    }
+}
+
+void Solver::retrieveSpawnerIDs()
+{
+    std::vector<std::string> spawnerIDs;
+    for (Spawner spawner : spawners) {
+        spawnerIDs.push_back(spawner.id);
+    }
+    emit returnSpawnerIDs(spawnerIDs);
 }

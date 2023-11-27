@@ -2,6 +2,8 @@
 
 #include <QtWidgets/qlabel.h>
 
+// VectorInput=====================================================================================
+
 VectorInput::VectorInput(Orientation orient, QWidget* parent) : QWidget(parent)
 {
 	if (orient == Orientation::Horizontal) { layout = new QHBoxLayout(this); }
@@ -49,6 +51,8 @@ void VectorInput::setYText(const QString& text) { yInput->setText(text); }
 // forwards signal from either lineedit
 void VectorInput::xChanged(const QString& text) { emit textChanged(text, yInput->text()); }
 void VectorInput::yChanged(const QString& text) { emit textChanged(xInput->text(), text); }
+
+// RGBInput========================================================================================
 
 RGBInput::RGBInput(QWidget* parent) : QWidget(parent)
 {
@@ -119,4 +123,115 @@ void RGBInput::setValues(int r, int g, int b)
 	rSpinBox->setValue(r);
 	gSpinBox->setValue(g);
 	bSpinBox->setValue(b);
+}
+
+// SpawnerEdit=====================================================================================
+
+SpawnerEdit::SpawnerEdit(Spawner* spawner, QWidget* parent) : QDialog(parent)
+{
+	spawnerFormLayout = new QGridLayout(this);
+	this->setLayout(spawnerFormLayout);
+	this->setWindowTitle("Edit Spawner");
+
+	// spawner creation form
+	idInput = new QLineEdit(this);
+	idInput->setPlaceholderText("ex. spawner1");
+	idInput->setText(QString::fromStdString(spawner->id));
+	QRegularExpression idRe("^[a-zA-Z0-9_-]+$");
+	QRegularExpressionValidator* idValidator = new QRegularExpressionValidator(idRe, this);
+	idInput->setValidator(idValidator);
+
+	// position and velocity input
+	posInput = new VectorInput(VectorInput::Orientation::Horizontal, this);
+	posInput->setXText(QString::number(spawner->pos.x()));
+	posInput->setYText(QString::number(spawner->pos.y()));
+	velInput = new VectorInput(VectorInput::Orientation::Horizontal, this);
+	velInput->setXText(QString::number(spawner->vel.x()));
+	velInput->setYText(QString::number(spawner->vel.y()));
+
+	// interval input
+	intervalInput = new QLineEdit(this);
+	intervalInput->setPlaceholderText("ex. 0.5");
+	intervalInput->setText(QString::number(spawner->interval));
+	QRegularExpression intervalRe("^((0+(\.(0*[1-9]+\d*)))|([1-9]+\d*(\.\d+)?)|(\.(0*[1-9]+\d*)))$");	// match all positive non-zero doubles
+	QRegularExpressionValidator* intervalValidator = new QRegularExpressionValidator(intervalRe, this);
+	intervalInput->setValidator(intervalValidator);
+
+	// active/visibility
+	active = new QCheckBox(this);
+	active->setChecked(spawner->active);
+	visible = new QCheckBox(this);
+	visible->setChecked(spawner->visible);
+
+	// buttons
+	cancelButton = new QPushButton("Cancel", this);
+	cancelButton->setDefault(true);
+	applyButton = new QPushButton("Apply", this);
+	okButton = new QPushButton("OK", this);
+	QHBoxLayout* spawnerFormButtonLayout = new QHBoxLayout(this);
+	spawnerFormButtonLayout->addWidget(cancelButton);
+	spawnerFormButtonLayout->addStretch();
+	spawnerFormButtonLayout->addWidget(applyButton);
+	spawnerFormButtonLayout->addWidget(okButton);
+	spawnerFormButtonLayout->setContentsMargins(0, 0, 0, 0);
+
+	spawnerFormLayout->addWidget(new QLabel("ID:"),		  0, 0, Qt::AlignRight);
+	spawnerFormLayout->addWidget(new QLabel("Position:"), 1, 0, Qt::AlignRight);
+	spawnerFormLayout->addWidget(new QLabel("Velocity:"), 2, 0, Qt::AlignRight);
+	spawnerFormLayout->addWidget(new QLabel("Interval:"), 3, 0, Qt::AlignRight);
+	spawnerFormLayout->addWidget(new QLabel("Active:"),   4, 0, Qt::AlignRight);
+	spawnerFormLayout->addWidget(new QLabel("Visible:"),  5, 0, Qt::AlignRight);
+	spawnerFormLayout->addWidget(idInput,		0, 1);
+	spawnerFormLayout->addWidget(posInput,		1, 1);
+	spawnerFormLayout->addWidget(velInput,		2, 1);
+	spawnerFormLayout->addWidget(intervalInput, 3, 1);
+	spawnerFormLayout->addWidget(active,		4, 1);
+	spawnerFormLayout->addWidget(visible,		5, 1);
+	spawnerFormLayout->addWidget(new QLabel("px/s"), 1, 2, Qt::AlignLeft);
+	spawnerFormLayout->addWidget(new QLabel("px/s"), 2, 2, Qt::AlignLeft);
+	spawnerFormLayout->addWidget(new QLabel("s"),	 3, 2, Qt::AlignLeft);
+	spawnerFormLayout->addLayout(spawnerFormButtonLayout, 6, 1);
+
+	QObject::connect(cancelButton, SIGNAL(clicked(bool)), this, SLOT(reject()));
+	QObject::connect(applyButton, &QPushButton::clicked, this, [=]() { 
+		SpawnerDTO spawnerDTO;
+		spawnerDTO.id		= idInput->text().toStdString();
+		spawnerDTO.posX		= posInput->x().toFloat();
+		spawnerDTO.posY		= posInput->y().toFloat();
+		spawnerDTO.velX		= velInput->x().toFloat();
+		spawnerDTO.velY		= velInput->y().toFloat();
+		spawnerDTO.interval = intervalInput->text().toFloat();
+		spawnerDTO.active   = active->isChecked();
+		spawnerDTO.visible  = visible->isChecked();
+
+		emit applySpawnerEdits(spawner->id, spawnerDTO); 
+	});
+	QObject::connect(okButton, &QPushButton::clicked, this, [=]() { 
+		SpawnerDTO spawnerDTO;
+		spawnerDTO.id		= idInput->text().toStdString();
+		spawnerDTO.posX		= posInput->x().toFloat();
+		spawnerDTO.posY		= posInput->y().toFloat();
+		spawnerDTO.velX		= velInput->x().toFloat();
+		spawnerDTO.velY		= velInput->y().toFloat();
+		spawnerDTO.interval = intervalInput->text().toFloat();
+		spawnerDTO.active	= active->isChecked();
+		spawnerDTO.visible	= visible->isChecked();
+
+		emit applySpawnerEdits(spawner->id, spawnerDTO); accept(); 
+	});
+}
+
+// SpawnerListEntry================================================================================
+
+SpawnerListEntry::SpawnerListEntry(std::string id, QWidget* parent) : QWidget(parent)
+{
+	entryLayout = new QHBoxLayout(this);
+	setLayout(entryLayout);
+
+	spawnerLabel = new QLabel(QString::fromStdString(id), this);
+	editButton = new QPushButton("Edit", this);
+
+	entryLayout->addWidget(spawnerLabel);
+	entryLayout->addStretch();
+	entryLayout->addWidget(editButton);
 }

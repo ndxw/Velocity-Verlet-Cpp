@@ -20,6 +20,8 @@ class ControlPanel : public QMainWindow
 	Q_OBJECT
 
 private:
+	Solver* solver;
+
 	QString separationLineStyle = QString("background-color: #c0c0c0;");
 	QString invalid = QString("background-color: #ffb0b0");
 	QString valid = QString("background-color: white");
@@ -91,6 +93,9 @@ private:
 	QPushButton* addButton;
 	QPushButton* clearButton;
 
+	// TEMP: spawner edit
+	QPushButton* editButton;
+
 	// spawning widgets
 	QListWidget* spawnerList;
 
@@ -99,6 +104,10 @@ private slots:
 	void restartDialogHandler();
 	void updateParam();
 	void addSpawner();
+
+public slots:
+	void receiveSpawner(Spawner*);
+	void receiveSpawnerIDs(std::vector<std::string>);
 
 public:
 	ControlPanel(Solver* solver = 0, Renderer* renderer = 0);
@@ -115,7 +124,9 @@ signals:
 	void applySubsteps(int);
 	void applyMaxObjects(int);
 	void applyGravity(float, float);
-	void addSpawner(std::string, float, float, float, float, float, bool, bool);
+	void addSpawner(SpawnerDTO);
+	void getSpawner(std::string);
+	void getSpawnerIDs();
 };
 
 #endif
