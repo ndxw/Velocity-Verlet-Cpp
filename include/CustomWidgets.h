@@ -14,6 +14,7 @@
 #include <QtWidgets/qdialog.h>
 #include <QtWidgets/qcheckbox.h>
 #include <QtWidgets/qpushbutton.h>
+#include <QtWidgets/qlabel.h>
 
 //==================================================================
 

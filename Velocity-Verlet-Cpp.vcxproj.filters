@@ -89,6 +89,12 @@
     <ClCompile Include="src\CustomWidgets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\SpawnerListDelegate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SpawnerListModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\cpp.hint">
@@ -106,6 +112,12 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="include\CustomWidgets.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="include\SpawnerListDelegate.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="include\SpawnerListModel.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

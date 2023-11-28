@@ -1,4 +1,6 @@
 #include "../include/ControlPanel.h"
+#include "../include/SpawnerListDelegate.h"
+#include "../include/SpawnerListModel.h"
 
 #include <string>
 #include <iostream>
@@ -326,7 +328,17 @@ void ControlPanel::initSpawning(Solver* solver)
 	QGroupBox* spawnerFormGroup = new QGroupBox("Create Spawner");
 	spawnerFormGroup->setLayout(spawnerFormLayout);
 
-	spawnerList = new QListWidget(this);
+	// list view==============================================================================
+	spawnerList = new QListView(this);
+	spawnerList->setAlternatingRowColors(true);
+
+	SpawnerListModel model;
+	spawnerList->setModel(&model);
+	spawnerList->setItemDelegate(new SpawnerListDelegate);
+
+	spawnerList->show();
+
+	// list view end==========================================================================
 
 	// add to layout
 	QVBoxLayout* spawningOptionsLayout = new QVBoxLayout(this);

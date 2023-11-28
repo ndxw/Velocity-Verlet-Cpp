@@ -11,7 +11,7 @@
 #include <QtWidgets/qlayout.h>
 #include <QtWidgets/qpushbutton.h>
 #include <QtWidgets/qmessagebox.h>
-#include <QtWidgets/qlistwidget.h>
+#include <QtWidgets/qlistview.h>
 #include <QtWidgets/qcombobox.h>
 #include <QtWidgets/qcheckbox.h>
 
@@ -97,7 +97,7 @@ private:
 	QPushButton* editButton;
 
 	// spawning widgets
-	QListWidget* spawnerList;
+	QListView* spawnerList;
 
 private slots:
 	void togglePauseButton();

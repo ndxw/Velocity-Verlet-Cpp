@@ -19,10 +19,12 @@
   <ItemGroup>
     <QtMoc Include="include\ControlPanel.h" />
     <QtMoc Include="include\CustomWidgets.h" />
+    <QtMoc Include="include\SpawnerListDelegate.h" />
     <ClInclude Include="include\DTO.h" />
     <ClInclude Include="include\Grid.h" />
     <ClInclude Include="include\Objects.h" />
     <QtMoc Include="include\Renderer.h" />
+    <QtMoc Include="include\SpawnerListModel.h" />
     <ClInclude Include="include\Taskbar.h" />
     <ClInclude Include="include\Vec2D.h" />
     <QtMoc Include="include\Solver.h" />
@@ -40,11 +42,13 @@
   <ItemGroup>
     <ClCompile Include="src\ControlPanel.cpp" />
     <ClCompile Include="src\CustomWidgets.cpp" />
+    <ClCompile Include="src\SpawnerListDelegate.cpp" />
     <ClCompile Include="src\Grid.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Objects.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\Solver.cpp" />
+    <ClCompile Include="src\SpawnerListModel.cpp" />
     <ClCompile Include="src\Taskbar.cpp" />
     <ClCompile Include="src\Vec2D.cpp" />
   </ItemGroup>
